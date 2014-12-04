@@ -3,6 +3,7 @@ package se.lu.bos.rest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import se.lu.bos.dao.StatsDao;
 import se.lu.bos.model.Stats;
 import se.lu.bos.rest.dto.TinyReport;
 import se.lu.bos.scanner.ReportFileScanner;
+import se.lu.bos.scanner.ReportFileScannerBean;
 
 import java.util.List;
 
@@ -35,6 +37,9 @@ public class DataServiceBean {
     @Autowired
     ReportFileScanner reportFileScanner;
 
+    @Autowired
+    Environment env;
+
     @RequestMapping(method = RequestMethod.GET, value = "/reports", produces = "application/json")
     public ResponseEntity<List<Stats>> getAll() {
         return new ResponseEntity(statsDao.getAll(), HttpStatus.OK);
@@ -55,7 +60,7 @@ public class DataServiceBean {
     @RequestMapping(method = RequestMethod.POST, value = "/reports", produces = "application/json")
     public ResponseEntity<Stats> scanForReports() {
         int scannedReports = reportFileScanner.scan();
-        return new ResponseEntity("Scanned " + scannedReports + " mission reports", HttpStatus.OK);
+        return new ResponseEntity("Scanned " + scannedReports + " mission reports from " + env.getProperty("reports.directory", ReportFileScannerBean.SCAN_FOLDER), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/reports", produces = "application/json")

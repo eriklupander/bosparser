@@ -28,7 +28,7 @@ public class ReportFileScannerBean implements ReportFileScanner {
 
     private static final Logger log = LoggerFactory.getLogger(ReportFileScannerBean.class);
 
-    private static final String SCAN_FOLDER = "c:\\java\\bos-logs";
+    public static final String SCAN_FOLDER = "c:\\java\\bos-logs";
 
     private final BasicReportFileFilter fileFilter = new BasicReportFileFilter();
 
@@ -52,7 +52,10 @@ public class ReportFileScannerBean implements ReportFileScanner {
         int scanCount = 0;
 
         File[] files = new File(reportsFolder).listFiles(fileFilter);
-
+        if(files == null ||files.length == 0) {
+            log.warn("Specified report directory '" + reportsFolder + "' is empty or does not exist.");
+            return 0;
+        }
         for(File f : files) {
             String rootFileName = parseRootName(f);
             if(!statsDao.exists(clean(rootFileName))) {

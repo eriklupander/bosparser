@@ -21,7 +21,8 @@ bosparser is licensed under The MIT License and by using this software you agree
 
 == Installation instructions ==
 
-(1.) Find your game installation directory such as c:\Program Files\SteamApps\common\IL-2 Sturmovik Battle of Stalingrad
+(1.) Find your game installation directory such as c:\Program Files\SteamApps\common\IL-2 Sturmovik Battle of Stalingrad.
+
 (2.) In the installation /data folder, open "startup.cfg" with a text editor (notepad is good enough) and find the entries under [KEY = system]:
 
 mgenlog = 1
@@ -40,15 +41,21 @@ property in "starup.cfg". Useful if you don't feel like cluttering your /data fo
 You should now see these files in the folder you unzipped to:
 
 bosparser.bat
+
 bosparser-1.0-SNAPSHOT.war
+
 /config/application.properties
-README.md (this file)
-LICENSE.md
+
+README.md
+
+LICENSE
 
 (5.) Using your favourite text editor, open /config/application.properties file and edit the "reports.directory" property.
 Set the property value to the folder your log files are written to, for example:
 
-reports.directory = c:\Program Files\SteamApps\common\IL-2 Sturmovik Battle of Stalingrad\data
+reports.directory = c:\\Program Files\\SteamApps\\common\\IL-2 Sturmovik Battle of Stalingrad\\data
+
+(Note the \\ which helps java see the backslash as a backslash and not an esacpe character)
 
 (6.) Optionally, you can change the "server.port" property to something other than the default HTTP port of 80.
 
