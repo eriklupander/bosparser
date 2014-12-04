@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>IL-2 BoS mission debriefing</title>
+    <meta name="generator" content="Bootply"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top navbar-inverse">
+    <div class="container">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#" id="scanbtn">Scan for reports</a>
+        <a class="navbar-brand" href="#" id="deletebtn">Delete all reports</a>
+    </div>
+    <!-- /.container -->
+</div>
+<!-- /.navbar -->
+
+<!-- HEADER 
+=================================-->
+
+<div class="jumbotron text-center">
+    <div class="container">
+        <div class="row">
+            <div class="col col-lg-12 col-sm-12">
+                <h1>BoS Mission Debriefing</h1>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /header container-->
+
+<!-- CONTENT
+=================================-->
+<div class="container">
+    <div class="row">
+        <div class="col-md-3" id="leftCol">
+
+            <div class="well">
+                <ul class="nav nav-stacked" id="sidebar">
+                    <!-- Mission list goes here -->
+
+                </ul>
+            </div>
+
+        </div>
+        <div class="col-md-9">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Mission statistics</h3></div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-2 th">Mission</div>
+                                <div class="col-md-10" id="mission-name"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 th">Date</div>
+                                <div class="col-md-2" id="mission-date"></div>
+                                <div class="col-md-2 th">Time</div>
+                                <div class="col-md-2" id="mission-time"></div>
+                                <div class="col-md-2 th">Duration</div>
+                                <div class="col-md-2" id="mission-duration"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 th">Pilot name</div>
+                                <div class="col-md-2" id="pilot-name"></div>
+                                <div class="col-md-2 th">A/C kills</div>
+                                <div class="col-md-2" id="ac-kills"></div>
+                                <div class="col-md-2 th">Bullets fired</div>
+                                <div class="col-md-2" id="bullets-fired"></div>
+                            </div>
+                            <div class="row">
+
+                                <div class="col-md-2 th">Pilot aircraft</div>
+                                <div class="col-md-2" id="pilot-plane"></div>
+                                <div class="col-md-2 th">A/C damaged</div>
+                                <div class="col-md-2" id="ac-damaged"></div>
+                                <div class="col-md-2 th">Bullets hit</div>
+                                <div class="col-md-2" id="bullets-hit"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 th">Pilot status</div>
+                                <div class="col-md-2" id="pilot-status"></div>
+                                <div class="col-md-2 th">Crew killed</div>
+                                <div class="col-md-2" id="crew-kills"></div>
+                                <div class="col-md-2 th">Bullets left</div>
+                                <div class="col-md-2" id="bullets-left"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Kills</h3></div>
+                        <div class="panel-body" id="kills-table">
+                            <div class="row">
+                                <div class="col-md-3 th">Aircraft</div>
+                                <div class="col-md-3 th">Time</div>
+                                <div class="col-md-2 th">Hits</div>
+                                <div class="col-md-2 th">Pilot</div>
+                            </div>
+                            <!--
+                            <div class="row">
+                                <div class="col-md-3">Pe-2</div>
+                                <div class="col-md-3">00:14:34</div>
+                                <div class="col-md-2">5</div>
+                                <div class="col-md-2">Alive</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">Yak-1</div>
+                                <div class="col-md-3">00:15:24</div>
+                                <div class="col-md-2">4</div>
+                                <div class="col-md-2">Killed</div>
+                            </div>
+                            -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Hits</h3></div>
+                        <div class="panel-body" id="hits-table">
+                            <div class="row">
+                                <div class="col-md-2 th">Aircraft</div>
+                                <div class="col-md-1 th">ID</div>
+                                <div class="col-md-2 th">Time</div>
+                                <div class="col-md-5 th">Weapon</div>
+                                <div class="col-md-2 th">Damage</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+    </div>
+</div>
+<hr>
+<!-- /CONTENT ============-->
+</div>
+<!-- script references -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bosparser.js"></script>
+</body>
+</html>
+
+
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Scan result</h4>
+            </div>
+            <div class="modal-body">
+                <p id="modal-content"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script>
+    $('#scanbtn').click(bosparser.scan);
+    $('#deletebtn').click(bosparser.deleteAll);
+    bosparser.populateSidebar();
+</script>
