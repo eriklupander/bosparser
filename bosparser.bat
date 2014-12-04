@@ -1,0 +1,1 @@
+java -jar bosparser-1.0-SNAPSHOT.war

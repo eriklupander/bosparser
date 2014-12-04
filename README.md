@@ -12,6 +12,8 @@ The "bosparser" application provides a way to get decent feedback from missions 
 Information included in the debriefings includes general mission information, number of kills, planes shot down and individual bullet hits on aircraft,
 
 
+bosparser is licensed under The MIT License and by using this software you agree to the licensing terms of the MIT License (see LICENSE file)
+
 
 == Prerequisites ==
 
@@ -19,21 +21,21 @@ Information included in the debriefings includes general mission information, nu
 
 == Installation instructions ==
 
-1. Find your game installation directory such as c:\Program Files\SteamApps\common\IL-2 Sturmovik Battle of Stalingrad
-2. In the installation /data folder, open "startup.cfg" and find the entries under [KEY = system]:
+(1.) Find your game installation directory such as c:\Program Files\SteamApps\common\IL-2 Sturmovik Battle of Stalingrad
+(2.) In the installation /data folder, open "startup.cfg" with a text editor (notepad is good enough) and find the entries under [KEY = system]:
 
 mgenlog = 1
 mission_text_log = 1
 
 Make sure these two are set to = 1 just as above. This will make the simulator write textual log files to your /data directory.
 
-3. Optionally, the log output folder can be configured with the
+(3.) Optionally, the log output folder can be configured with the
 
 text_log_folder = ""
 
 property in "starup.cfg". Useful if you don't feel like cluttering your /data folder with hundreds of log files.
 
-4. Download the .zip archive with the bosparser application. Unzip it somewhere, for example into c:\Program files\bosparser
+(4.) Download the .zip archive with the bosparser application. Unzip it somewhere, for example into c:\Program files\bosparser
 
 You should now see these files in the folder you unzipped to:
 
@@ -43,19 +45,20 @@ bosparser-1.0-SNAPSHOT.war
 README.md (this file)
 LICENSE.md
 
-5 Using your favourite text editor, open /config/application.properties file and edit the "reports.directory" property.
+(5.) Using your favourite text editor, open /config/application.properties file and edit the "reports.directory" property.
 Set the property value to the folder your log files are written to, for example:
 
 reports.directory = c:\Program Files\SteamApps\common\IL-2 Sturmovik Battle of Stalingrad\data
 
-6 Optionally, you can change the "server.port" property to something other than the default HTTP port of 80.
+(6.) Optionally, you can change the "server.port" property to something other than the default HTTP port of 80.
 
-7. To start bosparser, either use the bosparser.bat file or type the following in a command shell:
+(7.) To start bosparser, either use the bosparser.bat file or type the following in a command shell:
 
 java -jar bosparser-1.0-SNAPSHOT.war
 
-This will launch the bosparser application.
-To access the GUI, open your preferred Web Browser (Chrome, Firefox, Internet Explorer or Safari for example) and enter "http://localhost" (most browsers can handle just "localhost" too)
+This will launch the bosparser application. Please note that your Windows Firewall may ask for permission to open a port or something. I think it should work anyway.
+
+To access the GUI, open your preferred Web Browser (Chrome, Firefox, Internet Explorer or Safari for example) and enter "http://localhost" (most browsers can handle just "localhost" too) into the address field.
 * If you changed the HTTP port (server.port) property in application.properties, you will need to add the port number at the end: "http://localhost:8080"   if you changed to 8080.
 
 The browser should now show a rather empty skeleton GUI. Click the "Scan" button in the top left corner and bosparser will scan & parse
@@ -98,3 +101,27 @@ your Java install directory and add its "/bin" folder to your PATH environment v
 The latest installation package from Oracle should be available here: https://java.com/en/download/index.jsp
 
 A JRE is sufficient, no need to download the full JDK.
+
+
+== Software License ==
+The MIT License (MIT)
+
+Copyright (c) 2014 eriklupander
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
