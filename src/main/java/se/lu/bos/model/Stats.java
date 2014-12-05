@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import se.lu.bos.util.TimeUtil;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,6 +27,29 @@ public class Stats {
     private String totalDuration;
     private Date reportFileDate;
 
+    @Transient
+    private Comparator<Hit> hitComparator = new Comparator<Hit>() {
+
+        @Override
+        public int compare(Hit o1, Hit o2) {
+            return o1.getTime().compareTo(o2.getTime());
+        }
+    };
+
+    @Transient
+    private Comparator<GameObject> gameObjectComparator = new Comparator<GameObject>() {
+
+        @Override
+        public int compare(GameObject o1, GameObject o2) {
+            if(o1.getTimeOfKill() != null && o2.getTimeOfKill() != null) {
+                return o1.getTimeOfKill().compareTo(o2.getTimeOfKill());
+            }
+            if(o1.getTimeOfKill() == null) return -1;
+            if(o2.getTimeOfKill() == null) return 1;
+            return 0;
+        }
+    };
+
     public Long getId() {
         return id;
     }
@@ -46,7 +67,12 @@ public class Stats {
     private List<String> textualLog = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "stats_hits_inflicted")
     private List<Hit> hits = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "stats_hits_taken")
+    private List<Hit> hitsTaken = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "stats_gameobject_kills")
@@ -115,6 +141,7 @@ public class Stats {
     }
 
     public List<GameObject> getKills() {
+        Collections.sort(kills, gameObjectComparator);
         return kills;
     }
 
@@ -125,11 +152,20 @@ public class Stats {
 
 
     public List<Hit> getHits() {
+        Collections.sort(hits, hitComparator);
         return hits;
     }
 
     public void setHits(List<Hit> hits) {
         this.hits = hits;
+    }
+
+    public List<Hit> getHitsTaken() {
+        return hitsTaken;
+    }
+
+    public void setHitsTaken(List<Hit> hitsTaken) {
+        this.hitsTaken = hitsTaken;
     }
 
     public Integer getStartingAmmo() {
@@ -175,20 +211,35 @@ public class Stats {
 
     @Transient
     public Integer getAircraftKillCount() {
-        long count = kills.stream().filter(g -> g.getState() == State.KILLED && g.getGameObjectType() == GameObjectType.PLANE).count();
-        return new Integer((int) count);
+        int count = 0;
+        for(GameObject kill : kills) {
+            if(kill.getGameObjectType() == GameObjectType.VEHICLE) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Transient
     public Integer getAircraftHitNotKilledCount() {
-        long count = associatedObjects.stream().filter(g -> !g.getGameObjectId().equals(this.playerId) && g.getState() == State.ALIVE && g.getGameObjectType() == GameObjectType.PLANE).count();
-        return new Integer((int) count);
+        int count = 0;
+        for(GameObject go : associatedObjects) {
+            if(go.getGameObjectType() == GameObjectType.VEHICLE && go.getState() == State.ALIVE && !go.getGameObjectId().equals(this.playerId)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Transient
     public Integer getPilotKillCount() {
-        long count = kills.stream().filter(g -> g.getState() == State.KILLED && g.getGameObjectType() == GameObjectType.PILOT).count();
-        return new Integer((int) count);
+        int count = 0;
+        for(GameObject kill : kills) {
+            if(kill.getGameObjectType() == GameObjectType.PILOT) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Transient

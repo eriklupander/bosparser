@@ -34,7 +34,11 @@ public class Hit {
     private Integer attackerId;
     private Integer targetId;
 
+    private String name;
     private String target;
+
+    private String attackerName;
+    private String attacker;
 
 //    @ManyToOne(cascade = CascadeType.ALL)
 //    private GameObject attacker;
@@ -58,6 +62,14 @@ public class Hit {
 
     public void setTarget(String target) {
         this.target = target;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAmmo() {
@@ -98,6 +110,22 @@ public class Hit {
 
     public void setTargetId(Integer targetId) {
         this.targetId = targetId;
+    }
+
+    public String getAttackerName() {
+        return attackerName;
+    }
+
+    public void setAttackerName(String attackerName) {
+        this.attackerName = attackerName;
+    }
+
+    public String getAttacker() {
+        return attacker;
+    }
+
+    public void setAttacker(String attacker) {
+        this.attacker = attacker;
     }
 
     // Each tick is 1/50 of a second, e.g. 20 ms

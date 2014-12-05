@@ -82,7 +82,7 @@
                             <div class="row">
                                 <div class="col-md-2 th">Pilot name</div>
                                 <div class="col-md-2" id="pilot-name"></div>
-                                <div class="col-md-2 th">A/C kills</div>
+                                <div class="col-md-2 th">Targets killed</div>
                                 <div class="col-md-2" id="ac-kills"></div>
                                 <div class="col-md-2 th">Bullets fired</div>
                                 <div class="col-md-2" id="bullets-fired"></div>
@@ -91,7 +91,7 @@
 
                                 <div class="col-md-2 th">Pilot aircraft</div>
                                 <div class="col-md-2" id="pilot-plane"></div>
-                                <div class="col-md-2 th">A/C damaged</div>
+                                <div class="col-md-2 th">Targets dmgd</div>
                                 <div class="col-md-2" id="ac-damaged"></div>
                                 <div class="col-md-2 th">Bullets hit</div>
                                 <div class="col-md-2" id="bullets-hit"></div>
@@ -115,8 +115,10 @@
                         <div class="panel-heading"><h3>Kills</h3></div>
                         <div class="panel-body" id="kills-table">
                             <div class="row">
-                                <div class="col-md-3 th">Aircraft</div>
-                                <div class="col-md-3 th">Time</div>
+                                <div class="col-md-2 th">Target</div>
+                                <div class="col-md-3 th">Type</div>
+                                <div class="col-md-1 th">ID</div>
+                                <div class="col-md-2 th">Time</div>
                                 <div class="col-md-2 th">Hits</div>
                                 <div class="col-md-2 th">Pilot</div>
                             </div>
@@ -139,13 +141,32 @@
                 </div>
                 <div class="col-md-12">
                     <div class="panel panel-default">
-                        <div class="panel-heading"><h3>Hits</h3></div>
+                        <div class="panel-heading"><h3>Hits inflicted</h3></div>
                         <div class="panel-body" id="hits-table">
                             <div class="row">
-                                <div class="col-md-2 th">Aircraft</div>
+                                <div class="col-md-2 th">Name</div>
+                                <div class="col-md-3 th">Type</div>
                                 <div class="col-md-1 th">ID</div>
-                                <div class="col-md-2 th">Time</div>
-                                <div class="col-md-5 th">Weapon</div>
+                                <div class="col-md-1 th">Time</div>
+                                <div class="col-md-3 th">Weapon</div>
+                                <div class="col-md-2 th">Damage</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Hits taken</h3></div>
+                        <div class="panel-body" id="hitstaken-table">
+                            <div class="row">
+                                <div class="col-md-2 th">From</div>
+                                <div class="col-md-3 th">Type</div>
+                                <div class="col-md-1 th">ID</div>
+                                <div class="col-md-1 th">Time</div>
+                                <div class="col-md-3 th">Weapon</div>
                                 <div class="col-md-2 th">Damage</div>
                             </div>
 

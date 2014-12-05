@@ -42,6 +42,7 @@ public class Parser {
 
 
         List<String> playerEntries = buildPlayerEntries(playerId, logRows);
+
         //playerEntries.stream().forEach(s -> System.out.println(s));
 
         for(String entry : playerEntries) {
@@ -59,6 +60,7 @@ public class Parser {
                         mappedObjects.put(hit.getTargetId(), findGameObject(logRows, hit.getTargetId()));
                     }
 
+                    hit.setName(mappedObjects.get(hit.getTargetId()).getName());
                     hit.setTarget(mappedObjects.get(hit.getTargetId()).getType());
 
                     // Find the damage-entry for this hit. Match on timestamp
@@ -74,7 +76,15 @@ public class Parser {
                 }
             } else if(entry.contains("AType:3")) {
                 // T:70670 AType:3 AID:1865727 TID:822271 POS(114849.367,512.380,131898.188)
-
+                Integer targetId = Integer.parseInt(entry.substring(entry.indexOf(" TID:") + 5, entry.indexOf(" POS(")));
+                GameObject gameObject = findGameObject(logRows, targetId);
+                if(!stats.getKills().contains(gameObject)) {
+                    gameObject.setTimeOfKill(parseTime(entry));
+                    stats.getKills().add(gameObject);
+                }
+                if(!mappedObjects.containsKey(targetId)) {
+                    mappedObjects.put(targetId, gameObject);
+                }
             }
         }
 
@@ -106,7 +116,51 @@ public class Parser {
 
         for(Map.Entry<Integer, GameObject> entry : mappedObjects.entrySet()) {
             if(entry.getKey() != -1 && !entry.getValue().getGameObjectId().equals(playerId) && entry.getValue().getState() == State.KILLED) {
-                stats.getKills().add(entry.getValue());
+                if(!stats.getKills().contains(entry.getValue())) {
+                    stats.getKills().add(entry.getValue());
+                }
+            }
+        }
+
+
+        // Find hits that caused damage to us
+        List<String> playerAsTargetEntries = buildPlayerAsTargetEntries(playerId, logRows);
+        for(String entry : playerAsTargetEntries) {
+            if(entry.contains("AType:1")) {
+                // T:65095 AType:1 AMMO:SHELL_GER_20x82_AP AID:1865727 TID:822271
+
+                Matcher matcher = aType1Pattern.matcher(entry);
+                while (matcher.find()) {
+
+                    Integer attackerId = Integer.parseInt(entry.substring(entry.indexOf(" AID:")+5, entry.indexOf(" TID:")));
+                    Hit hit = new Hit(matcher.group(5), Long.parseLong(matcher.group(2)), attackerId, playerId);
+                    //hit.setAttacker(mappedObjects.get(playerId));
+
+                    if(!mappedObjects.containsKey(hit.getAttackerId())) {
+                        // Find the Object we were hit by. Store in hashmap.
+                        mappedObjects.put(hit.getAttackerId(), findGameObject(logRows, hit.getAttackerId()));
+                    }
+
+                    hit.setAttackerName(mappedObjects.get(hit.getAttackerId()).getName());
+                    if(     mappedObjects.get(hit.getAttackerId()) != null &&
+                            mappedObjects.get(hit.getAttackerId()).getParentId() != null &&
+                            mappedObjects.get(hit.getAttackerId()).getParentId() != -1)
+                    {
+                        hit.setAttacker(findGameObject(logRows, mappedObjects.get(hit.getAttackerId()).getParentId()).getType());
+                    } else {
+                        hit.setAttacker(mappedObjects.get(hit.getAttackerId()).getType());
+                    }
+
+                    // Find the damage-entry for this hit. Match on timestamp
+                    for(String row : playerEntries) {
+                        if(row.startsWith("T:" + hit.getTime() + " AType:2 DMG:")) {
+                            int startIndex = ("T:" + hit.getTime() + " AType:2 DMG:").length();
+                            hit.setDamage(Float.parseFloat(row.substring(startIndex, row.indexOf(" AID:"))));
+                        }
+                    }
+
+                    stats.getHitsTaken().add(hit);
+                }
             }
         }
 
@@ -165,8 +219,11 @@ public class Parser {
                 } else {
                     //  The object may be a child of a child. We need to recurse the current graph
                     parentObject = findGameObjectRecursively(o.getParentId(), mappedObjects.values());
-                    parentObject.getChildren().add(o);
-                    i.remove();
+                    if(parentObject != null) {
+                        parentObject.getChildren().add(o);
+                        i.remove();
+                    }
+
                 }
             }
         }
@@ -175,7 +232,7 @@ public class Parser {
 //            mappedObjects.remove(delete.getGameObjectId());
 //        }
 
-
+//        determineGameObjectTypes();
 
         stats.setAssociatedObjects(new ArrayList<>(mappedObjects.values()));
         stats.setCreated(new Date());
@@ -183,6 +240,7 @@ public class Parser {
 
         return stats;
     }
+
 
     private GameObject findGameObjectRecursively(Integer idToFind, Collection<GameObject> values) {
         for(GameObject o : values) {
@@ -211,7 +269,7 @@ public class Parser {
                     String pid = row.substring(row.indexOf(" PID:")+5);
                     Integer countryCode = Integer.parseInt(row.substring(row.indexOf(" COUNTRY:") + 9, row.indexOf(" NAME:")));
 
-                    return new GameObject(id, name, type, pid.equals("-1") ? GameObjectType.PLANE : GameObjectType.PILOT, Integer.parseInt(pid), countryFromCode(countryCode));
+                    return new GameObject(id, name, type, pid.equals("-1") ? GameObjectType.VEHICLE : GameObjectType.PILOT, Integer.parseInt(pid), countryFromCode(countryCode));
                 }
             }
         }
@@ -233,6 +291,16 @@ public class Parser {
         List<String> pList = new ArrayList<>();
         for(String row : logRows) {
             if(row.contains("AID:"+playerId)) {
+                pList.add(row);
+            }
+        }
+        return pList;
+    }
+
+    private List<String> buildPlayerAsTargetEntries(Integer playerId, List<String> logRows) {
+        List<String> pList = new ArrayList<>();
+        for(String row : logRows) {
+            if(row.contains("TID:"+playerId)) {
                 pList.add(row);
             }
         }

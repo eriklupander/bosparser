@@ -8,5 +8,5 @@ package se.lu.bos.model;
  * To change this template use File | Settings | File Templates.
  */
 public enum GameObjectType {
-    PLANE, PILOT;
+    VEHICLE, PILOT;
 }

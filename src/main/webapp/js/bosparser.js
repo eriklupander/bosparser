@@ -83,8 +83,10 @@ var bosparser = new function() {
                 for(var a = 0; a < data.kills.length; a++) {
                     var kill = data.kills[a];
                      var tpl = '<div class="row itemrow">';
+                    tpl +=  '<div class="col-md-2">' + kill.name + '</div>';
                     tpl +=  '<div class="col-md-3">' + kill.type + '</div>';
-                    tpl +=  '<div class="col-md-3">' + kill.gameTime + '</div>';
+                    tpl +=  '<div class="col-md-1">' + kill.gameObjectId + '</div>';
+                    tpl +=  '<div class="col-md-2">' + kill.gameTime + '</div>';
                     tpl +=  '<div class="col-md-2">' + countHits(data.hits, kill.gameObjectId) + '</div>';
                     tpl +=  '<div class="col-md-2">' + 'FIXME' + '</div>';
                     tpl +=  '</div>';
@@ -112,10 +114,11 @@ var bosparser = new function() {
                 for(var a = 0; a < data.hits.length; a++) {
                     var hit = data.hits[a];
                     var tpl = '<div class="row itemrow">';
-                    tpl +=  '<div class="col-md-2">' + hit.target + '</div>';
+                    tpl +=  '<div class="col-md-2">' + hit.name + '</div>';
+                    tpl +=  '<div class="col-md-3">' + hit.target + '</div>';
                     tpl +=  '<div class="col-md-1">' + hit.targetId + '</div>';
-                    tpl +=  '<div class="col-md-2">' + hit.gameTime + '</div>';
-                    tpl +=  '<div class="col-md-5">' + hit.ammo + '</div>';
+                    tpl +=  '<div class="col-md-1">' + hit.gameTime + '</div>';
+                    tpl +=  '<div class="col-md-3">' + hit.ammo + '</div>';
                     tpl +=  '<div class="col-md-2">' + (hit.damage != null ? hit.damage : '') + '</div>';
                     tpl +=  '</div>';
                     $('#hits-table').append(tpl);
@@ -123,6 +126,25 @@ var bosparser = new function() {
             } else {
                 $('#hits-table').find(".itemrow").remove();
                 $('#hits-table').append('<div class="row itemrow"><div class="col-md-12">No hits recorded on this mission</div></div>');
+            }
+
+            if(data.hitsTaken.length > 0) {
+                $('#hitstaken-table').find(".itemrow").remove();
+                for(var a = 0; a < data.hitsTaken.length; a++) {
+                    var hit = data.hitsTaken[a];
+                    var tpl = '<div class="row itemrow">';
+                    tpl +=  '<div class="col-md-2">' + hit.attackerName + '</div>';
+                    tpl +=  '<div class="col-md-3">' + hit.attacker + '</div>';
+                    tpl +=  '<div class="col-md-1">' + hit.attackerId + '</div>';
+                    tpl +=  '<div class="col-md-1">' + hit.gameTime + '</div>';
+                    tpl +=  '<div class="col-md-3">' + hit.ammo + '</div>';
+                    tpl +=  '<div class="col-md-2">' + (hit.damage != null ? hit.damage : '') + '</div>';
+                    tpl +=  '</div>';
+                    $('#hitstaken-table').append(tpl);
+                }
+            } else {
+                $('#hitstaken-table').find(".itemrow").remove();
+                $('#hitstaken-table').append('<div class="row itemrow"><div class="col-md-12">No hits taken on this mission</div></div>');
             }
         });
     }
