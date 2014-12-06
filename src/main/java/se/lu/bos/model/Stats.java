@@ -28,7 +28,7 @@ public class Stats {
     private Date reportFileDate;
 
     @Transient
-    private Comparator<Hit> hitComparator = new Comparator<Hit>() {
+    private static Comparator<Hit> hitComparator = new Comparator<Hit>() {
 
         @Override
         public int compare(Hit o1, Hit o2) {
@@ -37,7 +37,7 @@ public class Stats {
     };
 
     @Transient
-    private Comparator<GameObject> gameObjectComparator = new Comparator<GameObject>() {
+    private static Comparator<GameObject> gameObjectComparator = new Comparator<GameObject>() {
 
         @Override
         public int compare(GameObject o1, GameObject o2) {
@@ -49,6 +49,7 @@ public class Stats {
             return 0;
         }
     };
+
 
     public Long getId() {
         return id;
@@ -63,24 +64,25 @@ public class Stats {
     private Integer startingAmmo;
     private Integer finalAmmo;
 
-    @ElementCollection
-    private List<String> textualLog = new ArrayList<>();
-
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "stats_hits_inflicted")
-    private List<Hit> hits = new ArrayList<>();
+    private List<Hit> hits = new ArrayList<Hit>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "stats_hits_taken")
-    private List<Hit> hitsTaken = new ArrayList<>();
+    private List<Hit> hitsTaken = new ArrayList<Hit>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "stats_gameobject_kills")
-    private List<GameObject> kills = new ArrayList<>();
+    private List<GameObject> kills = new ArrayList<GameObject>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "stats_gameobjects")
-    private List<GameObject> associatedObjects = new ArrayList<>();
+    private List<GameObject> associatedObjects = new ArrayList<GameObject>();
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "stats_all_gameobjects")
+    private List<GameObject> allGameObjects = new ArrayList<GameObject>();
 
     private Integer playerId;
     private String pilotName;
@@ -122,14 +124,6 @@ public class Stats {
 
     public void setRootFileName(String rootFileName) {
         this.rootFileName = rootFileName;
-    }
-
-    public List<String> getTextualLog() {
-        return textualLog;
-    }
-
-    public void setTextualLog(List<String> textualLog) {
-        this.textualLog = textualLog;
     }
 
     public List<GameObject> getAssociatedObjects() {
@@ -244,17 +238,29 @@ public class Stats {
 
     @Transient
     public Integer getNonExplosiveHits() {
-        return new Integer((int) hits.stream().filter(p -> !p.getAmmo().contains("explosion")).count());
+        int count = 0;
+        for(Hit hit : hits) {
+            if(!hit.getAmmo().contains("explosion")) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Transient
     public Integer getHitsOfType(String ammo) {
-        return new Integer((int) hits.stream().filter(p -> p.getAmmo().equals(ammo)).count());
+        int count = 0;
+        for(Hit hit : hits) {
+            if(hit.getAmmo().equals(ammo)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Transient
     public List<String> getUniqueAmmoTypes() {
-        List<String> types = new ArrayList<>();
+        List<String> types = new ArrayList<String>();
         for(Hit h : hits) {
             if(!types.contains(h.getAmmo())) {
                 types.add(h.getAmmo());
@@ -266,13 +272,25 @@ public class Stats {
     @Override
     public String toString() {
         return "Stats{" +
-                "startingAmmo=" + startingAmmo +
+                "id=" + id +
+                ", gameDate='" + gameDate + '\'' +
+                ", gameTime='" + gameTime + '\'' +
+                ", missionName='" + missionName + '\'' +
+                ", totalDuration='" + totalDuration + '\'' +
+                ", reportFileDate=" + reportFileDate +
+                ", hitComparator=" + hitComparator +
+                ", gameObjectComparator=" + gameObjectComparator +
+                ", rootFileName='" + rootFileName + '\'' +
+                ", startingAmmo=" + startingAmmo +
                 ", finalAmmo=" + finalAmmo +
-                ", textualLog=" + textualLog +
                 ", hits=" + hits +
+                ", hitsTaken=" + hitsTaken +
                 ", kills=" + kills +
+                ", associatedObjects=" + associatedObjects +
+                ", playerId=" + playerId +
                 ", pilotName='" + pilotName + '\'' +
                 ", pilotPlane='" + pilotPlane + '\'' +
+                ", created=" + created +
                 '}';
     }
 
@@ -315,4 +333,30 @@ public class Stats {
         }
         return TimeUtil.parseDate(this.reportFileDate);
     }
+
+    public void setAllGameObjects(List<GameObject> allGameObjects) {
+        this.allGameObjects = allGameObjects;
+    }
+
+    public List<GameObject> getAllGameObjects() {
+        return allGameObjects;
+    }
+
+    @Transient
+    public List<GameObject> getGameObjectHierarchy() {
+        List<GameObject> outList = new ArrayList<GameObject>();
+        for(GameObject g : allGameObjects) {
+            for(GameObject child : allGameObjects) {
+                if(child.getParentId().equals(g.getGameObjectId())) {
+                    g.getChildren().add(child);
+                }
+            }
+            if(g.getParentId() == null || g.getParentId() == -1) {
+                outList.add(g);
+            }
+        }
+        return outList;
+    }
+
+
 }

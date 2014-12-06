@@ -45,7 +45,7 @@ public class GameObject {
 
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<GameObject> children = new ArrayList<>();
+    private List<GameObject> children = new ArrayList<GameObject>();
 
     public GameObject() {
     }

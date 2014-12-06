@@ -146,7 +146,48 @@ var bosparser = new function() {
                 $('#hitstaken-table').find(".itemrow").remove();
                 $('#hitstaken-table').append('<div class="row itemrow"><div class="col-md-12">No hits taken on this mission</div></div>');
             }
+
+
+            if(data.gameObjectHierarchy.length > 0) {
+                var tpl = '';
+                for(var a = 0; a < data.gameObjectHierarchy.length; a++) {
+                    var obj = data.gameObjectHierarchy[a];
+                    tpl += buildTree(obj);
+                }
+                $('#objtree').empty().html(tpl);
+
+
+                    $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+
+                    $('.tree li.parent_li > span').on('click', function (e) {
+                        var children = $(this).parent('li.parent_li').find(' > ul > li');
+                        if (children.is(":visible")) {
+                            children.hide('fast');
+                            $(this).attr('title', 'Expand').find(' > i').addClass('glyphicon-plus-sign').removeClass('glyphicon-minus-sign');
+                        } else {
+                            children.show('fast');
+                            $(this).attr('title', 'Collapse').find(' > i').addClass('glyphicon-minus-sign').removeClass('glyphicon-plus-sign');
+                        }
+                        e.stopPropagation();
+                    });
+
+
+            }
         });
+    }
+
+    var buildTree = function(obj) {
+        var tpl = '<ul><li> <span><i class="glyphicon glyphicon-folder-open"></i> '+obj.type+'</span>';
+        if(obj.children.length == 0) {
+            tpl += '</li></ul>';
+            return tpl;
+        } else {
+            for(var a = 0; a < obj.children.length; a++) {
+                tpl += buildTree(obj.children[a]);
+            }
+        }
+        tpl += '</li></ul>';
+        return tpl;
     }
 
     var countHits = function(hits, gameObjectId) {

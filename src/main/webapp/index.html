@@ -7,13 +7,15 @@
     <meta name="generator" content="Bootply"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/jquery-migrate-1.2.1.min.js"></script>
     <!--[if lt IE 9]>
-    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="js/html5.js"></script>
     <![endif]-->
 
     <link href="css/styles.css" rel="stylesheet">
+    <link href="css/tree.css" rel="stylesheet">
 </head>
 <body>
 
@@ -112,7 +114,7 @@
                 <div class="col-md-12">
 
                     <div class="panel panel-default">
-                        <div class="panel-heading"><h3>Kills</h3></div>
+                        <div class="panel-heading"><h3>Targets destroyed</h3></div>
                         <div class="panel-body" id="kills-table">
                             <div class="row">
                                 <div class="col-md-2 th">Target</div>
@@ -122,20 +124,6 @@
                                 <div class="col-md-2 th">Hits</div>
                                 <div class="col-md-2 th">Pilot</div>
                             </div>
-                            <!--
-                            <div class="row">
-                                <div class="col-md-3">Pe-2</div>
-                                <div class="col-md-3">00:14:34</div>
-                                <div class="col-md-2">5</div>
-                                <div class="col-md-2">Alive</div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-3">Yak-1</div>
-                                <div class="col-md-3">00:15:24</div>
-                                <div class="col-md-2">4</div>
-                                <div class="col-md-2">Killed</div>
-                            </div>
-                            -->
                         </div>
                     </div>
                 </div>
@@ -173,9 +161,22 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>All objects registered in mission</h3></div>
+                        <div class="panel-body">
+
+
+                            <div id="objtree" class="tree well">
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
-
         <hr>
 
     </div>
@@ -195,7 +196,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
                 <h4 class="modal-title">Scan result</h4>
             </div>
             <div class="modal-body">
@@ -204,8 +206,10 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
 
@@ -213,4 +217,22 @@
     $('#scanbtn').click(bosparser.scan);
     $('#deletebtn').click(bosparser.deleteAll);
     bosparser.populateSidebar();
+
+
+    $(function () {
+        $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+
+        $('.tree li.parent_li > span').on('click', function (e) {
+            var children = $(this).parent('li.parent_li').find(' > ul > li');
+            if (children.is(":visible")) {
+                children.hide('fast');
+                $(this).attr('title', 'Expand').find(' > i').addClass('glyphicon-plus-sign').removeClass('glyphicon-minus-sign');
+            } else {
+                children.show('fast');
+                $(this).attr('title', 'Collapse').find(' > i').addClass('glyphicon-minus-sign').removeClass('glyphicon-plus-sign');
+            }
+            e.stopPropagation();
+        });
+
+    });
 </script>

@@ -87,7 +87,7 @@ public class StatsDaoBean implements StatsDao {
 
     @Override
     public List<TinyReport> getTinyReports() {
-        List<TinyReport> list = new ArrayList<>();
+        List<TinyReport> list = new ArrayList<TinyReport>();
         List<Object[]> resultList = em.createQuery("SELECT s.id, s.missionName, s.reportFileDate FROM Stats s").getResultList();
         if(resultList != null) {
             for(Object[] row : resultList) {

@@ -1,7 +1,7 @@
 package se.lu.bos.parser;
 
 import java.io.*;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,7 +28,15 @@ public class Concatenator {
         StringBuilder buf = new StringBuilder();
         BufferedReader br = null;
         // TODO sort log files first.
-        for(File f : dir.listFiles()) {
+        List<File> fileList = Arrays.asList(dir.listFiles());
+        Collections.sort(fileList, new Comparator<File>() {
+
+            @Override
+            public int compare(File o1, File o2) {
+                return new Long(o1.lastModified()).compareTo(new Long(o2.lastModified()));
+            }
+        });
+        for(File f : fileList) {
             if(f.getName().startsWith(baseFileName)) {
                 br = new BufferedReader(new FileReader(f));
                 try {
