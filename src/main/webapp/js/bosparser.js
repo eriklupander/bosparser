@@ -58,7 +58,7 @@ var bosparser = new function() {
 
              $('#pilot-name').html(data.pilotName);
              $('#pilot-plane').html(data.pilotPlane);
-             $('#pilot-status').html('FIXME');
+             $('#pilot-status').html(data.finalState);
 
             $('#ac-kills').html(data.aircraftKillCount);
             $('#ac-damaged').html(data.aircraftHitNotKilledCount);
@@ -88,7 +88,7 @@ var bosparser = new function() {
                     tpl +=  '<div class="col-md-1">' + kill.gameObjectId + '</div>';
                     tpl +=  '<div class="col-md-2">' + kill.gameTime + '</div>';
                     tpl +=  '<div class="col-md-2">' + countHits(data.hits, kill.gameObjectId) + '</div>';
-                    tpl +=  '<div class="col-md-2">' + 'FIXME' + '</div>';
+                    tpl +=  '<div class="col-md-2">' + '' + '</div>';
                     tpl +=  '</div>';
                     $('#kills-table').append(tpl);
                 }
@@ -147,32 +147,32 @@ var bosparser = new function() {
                 $('#hitstaken-table').append('<div class="row itemrow"><div class="col-md-12">No hits taken on this mission</div></div>');
             }
 
-
-            if(data.gameObjectHierarchy.length > 0) {
-                var tpl = '';
-                for(var a = 0; a < data.gameObjectHierarchy.length; a++) {
-                    var obj = data.gameObjectHierarchy[a];
-                    tpl += buildTree(obj);
-                }
-                $('#objtree').empty().html(tpl);
-
-
-                    $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
-
-                    $('.tree li.parent_li > span').on('click', function (e) {
-                        var children = $(this).parent('li.parent_li').find(' > ul > li');
-                        if (children.is(":visible")) {
-                            children.hide('fast');
-                            $(this).attr('title', 'Expand').find(' > i').addClass('glyphicon-plus-sign').removeClass('glyphicon-minus-sign');
-                        } else {
-                            children.show('fast');
-                            $(this).attr('title', 'Collapse').find(' > i').addClass('glyphicon-minus-sign').removeClass('glyphicon-plus-sign');
-                        }
-                        e.stopPropagation();
-                    });
-
-
-            }
+              // Commented out for now, object hierarchy not ready yet.
+//            if(data.gameObjectHierarchy.length > 0) {
+//                var tpl = '';
+//                for(var a = 0; a < data.gameObjectHierarchy.length; a++) {
+//                    var obj = data.gameObjectHierarchy[a];
+//                    tpl += buildTree(obj);
+//                }
+//                $('#objtree').empty().html(tpl);
+//
+//
+//                    $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+//
+//                    $('.tree li.parent_li > span').on('click', function (e) {
+//                        var children = $(this).parent('li.parent_li').find(' > ul > li');
+//                        if (children.is(":visible")) {
+//                            children.hide('fast');
+//                            $(this).attr('title', 'Expand').find(' > i').addClass('glyphicon-plus-sign').removeClass('glyphicon-minus-sign');
+//                        } else {
+//                            children.show('fast');
+//                            $(this).attr('title', 'Collapse').find(' > i').addClass('glyphicon-minus-sign').removeClass('glyphicon-plus-sign');
+//                        }
+//                        e.stopPropagation();
+//                    });
+//
+//
+//            }
         });
     }
 

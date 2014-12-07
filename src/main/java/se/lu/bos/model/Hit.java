@@ -40,12 +40,6 @@ public class Hit {
     private String attackerName;
     private String attacker;
 
-//    @ManyToOne(cascade = CascadeType.ALL)
-//    private GameObject attacker;
-//
-//    @ManyToOne(cascade = CascadeType.ALL)
-//    private GameObject target;
-
     public Hit() {
     }
 

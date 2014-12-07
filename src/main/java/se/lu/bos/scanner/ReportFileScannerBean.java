@@ -28,7 +28,7 @@ public class ReportFileScannerBean implements ReportFileScanner {
 
     private static final Logger log = LoggerFactory.getLogger(ReportFileScannerBean.class);
 
-    public static final String SCAN_FOLDER = "c:\\java\\bos-logs";
+    public static final String DEFAULT_SCAN_FOLDER = "c:\\java\\bos-logs";
 
     private final BasicReportFileFilter fileFilter = new BasicReportFileFilter();
 
@@ -41,7 +41,7 @@ public class ReportFileScannerBean implements ReportFileScanner {
 
     @PostConstruct
     public void init() {
-        this.reportsFolder = env.getProperty("reports.directory", SCAN_FOLDER);
+        this.reportsFolder = env.getProperty("reports.directory", DEFAULT_SCAN_FOLDER);
         log.info("Set directory '" + this.reportsFolder + "' as reports folder");
     }
 

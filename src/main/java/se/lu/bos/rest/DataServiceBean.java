@@ -16,7 +16,13 @@ import se.lu.bos.rest.dto.TinyReport;
 import se.lu.bos.scanner.ReportFileScanner;
 import se.lu.bos.scanner.ReportFileScannerBean;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,6 +46,13 @@ public class DataServiceBean {
     @Autowired
     Environment env;
 
+    private static Comparator<? super TinyReport> tinyReportComparator = new Comparator<TinyReport>() {
+        @Override
+        public int compare(TinyReport o1, TinyReport o2) {
+            return o2.getCreated().compareTo(o1.getCreated());
+        }
+    };
+
     @RequestMapping(method = RequestMethod.GET, value = "/reports", produces = "application/json")
     public ResponseEntity<List<Stats>> getAll() {
         return new ResponseEntity(statsDao.getAll(), HttpStatus.OK);
@@ -49,7 +62,9 @@ public class DataServiceBean {
     @RequestMapping(method = RequestMethod.GET, value = "/tinyreports", produces = "application/json")
     public ResponseEntity<List<TinyReport>> getAllTiny() {
 
-        return new ResponseEntity(statsDao.getTinyReports(), HttpStatus.OK);
+        List<TinyReport> reports = statsDao.getTinyReports();
+        Collections.sort(reports, tinyReportComparator);
+        return new ResponseEntity(reports, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/reports/{id}", produces = "application/json")
@@ -60,7 +75,7 @@ public class DataServiceBean {
     @RequestMapping(method = RequestMethod.POST, value = "/reports", produces = "application/json")
     public ResponseEntity<Stats> scanForReports() {
         int scannedReports = reportFileScanner.scan();
-        return new ResponseEntity("Scanned " + scannedReports + " mission reports from " + env.getProperty("reports.directory", ReportFileScannerBean.SCAN_FOLDER), HttpStatus.OK);
+        return new ResponseEntity("Scanned " + scannedReports + " mission reports from " + env.getProperty("reports.directory", ReportFileScannerBean.DEFAULT_SCAN_FOLDER), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/reports", produces = "application/json")

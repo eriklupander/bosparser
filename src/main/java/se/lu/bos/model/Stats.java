@@ -27,38 +27,6 @@ public class Stats {
     private String totalDuration;
     private Date reportFileDate;
 
-    @Transient
-    private static Comparator<Hit> hitComparator = new Comparator<Hit>() {
-
-        @Override
-        public int compare(Hit o1, Hit o2) {
-            return o1.getTime().compareTo(o2.getTime());
-        }
-    };
-
-    @Transient
-    private static Comparator<GameObject> gameObjectComparator = new Comparator<GameObject>() {
-
-        @Override
-        public int compare(GameObject o1, GameObject o2) {
-            if(o1.getTimeOfKill() != null && o2.getTimeOfKill() != null) {
-                return o1.getTimeOfKill().compareTo(o2.getTimeOfKill());
-            }
-            if(o1.getTimeOfKill() == null) return -1;
-            if(o2.getTimeOfKill() == null) return 1;
-            return 0;
-        }
-    };
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     private String rootFileName;
 
     private Integer startingAmmo;
@@ -93,6 +61,43 @@ public class Stats {
 
     @Lob
     private String fullLog;
+
+    @Enumerated(EnumType.STRING)
+    private State finalState;
+
+    @Transient
+    private static Comparator<Hit> hitComparator = new Comparator<Hit>() {
+
+        @Override
+        public int compare(Hit o1, Hit o2) {
+            return o1.getTime().compareTo(o2.getTime());
+        }
+    };
+
+    @Transient
+    private static Comparator<GameObject> gameObjectComparator = new Comparator<GameObject>() {
+
+        @Override
+        public int compare(GameObject o1, GameObject o2) {
+            if(o1.getTimeOfKill() != null && o2.getTimeOfKill() != null) {
+                return o1.getTimeOfKill().compareTo(o2.getTimeOfKill());
+            }
+            if(o1.getTimeOfKill() == null) return -1;
+            if(o2.getTimeOfKill() == null) return 1;
+            return 0;
+        }
+    };
+
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
 
     public String getMissionName() {
         return missionName;
@@ -334,29 +339,37 @@ public class Stats {
         return TimeUtil.parseDate(this.reportFileDate);
     }
 
-    public void setAllGameObjects(List<GameObject> allGameObjects) {
-        this.allGameObjects = allGameObjects;
+    public void setFinalState(State finalState) {
+        this.finalState = finalState;
     }
 
-    public List<GameObject> getAllGameObjects() {
-        return allGameObjects;
+    public State getFinalState() {
+        return finalState;
     }
 
-    @Transient
-    public List<GameObject> getGameObjectHierarchy() {
-        List<GameObject> outList = new ArrayList<GameObject>();
-        for(GameObject g : allGameObjects) {
-            for(GameObject child : allGameObjects) {
-                if(child.getParentId().equals(g.getGameObjectId())) {
-                    g.getChildren().add(child);
-                }
-            }
-            if(g.getParentId() == null || g.getParentId() == -1) {
-                outList.add(g);
-            }
-        }
-        return outList;
-    }
+//    public void setAllGameObjects(List<GameObject> allGameObjects) {
+//        this.allGameObjects = allGameObjects;
+//    }
+//
+//    public List<GameObject> getAllGameObjects() {
+//        return allGameObjects;
+//    }
+//
+//    @Transient
+//    public List<GameObject> getGameObjectHierarchy() {
+//        List<GameObject> outList = new ArrayList<GameObject>();
+//        for(GameObject g : allGameObjects) {
+//            for(GameObject child : allGameObjects) {
+//                if(child.getParentId().equals(g.getGameObjectId())) {
+//                    g.getChildren().add(child);
+//                }
+//            }
+//            if(g.getParentId() == null || g.getParentId() == -1) {
+//                outList.add(g);
+//            }
+//        }
+//        return outList;
+//    }
 
 
 }

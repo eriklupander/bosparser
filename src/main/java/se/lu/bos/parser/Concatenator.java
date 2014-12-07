@@ -27,8 +27,11 @@ public class Concatenator {
         File dir = new File(baseFolder);
         StringBuilder buf = new StringBuilder();
         BufferedReader br = null;
-        // TODO sort log files first.
+
         List<File> fileList = Arrays.asList(dir.listFiles());
+
+        // Note that we sort the file list by create time instead of name so they are processed in the correct order
+        // we will later use the last entry to get total duration.
         Collections.sort(fileList, new Comparator<File>() {
 
             @Override
@@ -37,7 +40,7 @@ public class Concatenator {
             }
         });
         for(File f : fileList) {
-            if(f.getName().startsWith(baseFileName)) {
+            if(f.getName().startsWith(baseFileName) && f.getName().endsWith(".txt")) {
                 br = new BufferedReader(new FileReader(f));
                 try {
                     StringBuilder sb = new StringBuilder();

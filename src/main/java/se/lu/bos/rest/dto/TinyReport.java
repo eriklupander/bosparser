@@ -27,7 +27,7 @@ public class TinyReport {
     public void setTitle(String title) {
         if(title != null) {
             if(title.endsWith("_gen.msnbin")) {
-                this.title = "Quick Mission";
+                this.title = "Quick/Campaign Mission";
             } else {
                 this.title = title.substring(title.lastIndexOf("/")+1, title.length() - 7);
             }

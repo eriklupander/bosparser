@@ -1,15 +1,18 @@
 package se.lu.bos.parser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.lu.bos.model.*;
 import se.lu.bos.util.TimeUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
+
+    private static final Logger log = LoggerFactory.getLogger(Parser.class);
 
     public static final String REPORT_BASE_NAME = "missionReport(2014-11-30_23-38-38)"; //"missionReport(2014-11-30_23-33-34)"; //"missionReport(2014-11-30_17-14-34)";
 
@@ -36,7 +39,6 @@ public class Parser {
 
         Integer playerId = parsePlayerId(logRows);
         stats.setPlayerId(playerId);
-        System.out.println(playerId);
         mappedObjects.put(playerId, findGameObject(logRows, playerId));
 
 
@@ -45,7 +47,6 @@ public class Parser {
         processPlayerEntries(stats, logRows, playerId, playerEntries);
 
         // After looping over player entries, try to find final state of any objects we've hit:
-        // T:70855 AType:18 BOTID:823295 PARENTID:822271
         resolveDestroyedObjects(stats, logRows);
 
         storeKilledObjectsOnStats(stats, playerId);
@@ -54,7 +55,6 @@ public class Parser {
         resolveDamageOnPilot(stats, logRows, playerId, playerEntries);
 
         // Find own fighter, pilot name, starting and final ammo count etc.
-        // T:5 AType:10 PLID:287743 PID:288767 BUL:1200 SH:0 BOMB:0 RCT:0 (188986.344,999.733,138912.453) IDS:a8a19327-93a5-492a-8066-24f32ae0e044 LOGIN:0551fc36-cc61-45ed-9be1-8b393c3abcc7 NAME:Lupson TYPE:Bf 109 G-2 COUNTRY:201 FORM:1 FIELD:0 INAIR:0 PARENT:-1 PAYLOAD:0 FUEL:1.000 SKIN: WM:1
         resolveMetaData(stats, logRows, playerId);
 
         // Build hierarchy of mapped objects
@@ -64,12 +64,24 @@ public class Parser {
         stats.setAssociatedObjects(new ArrayList<GameObject>(mappedObjects.values()));
         stats.setCreated(new Date());
         stats.setTotalDuration(TimeUtil.gameTickToTime(parseTime(logRows.get(logRows.size() - 1))));
+        stats.setFinalState(resolveFinalPlayerObjectState(logRows, playerId));
 
-        findAllGameObjects(logRows);
-        stats.setAllGameObjects(allGameObjects);
+        // Leaving this commented out for now.
+      //  findAllGameObjects(logRows);
+      //  stats.setAllGameObjects(allGameObjects);
+
         logRecordedStats(stats);
 
         return stats;
+    }
+
+    private State resolveFinalPlayerObjectState(List<String> logRows, Integer playerId) {
+        for(String row : logRows) {
+            if(row.contains(" AType:3 ") && row.contains(" TID:" + playerId + " ")) {
+                return State.DESTROYED;
+            }
+        }
+        return State.ALIVE;
     }
 
     private void buildHierarichalGameObjectGraph() {
@@ -100,17 +112,18 @@ public class Parser {
     }
 
     private void logRecordedStats(Stats stats) {
-        System.out.println("Recorded " + stats.getHits().size() + " hits");
-        System.out.println("Recorded " + stats.getKills().size() + " kills");
+        log.info("Recorded " + stats.getHits().size() + " hits");
+        log.info("Recorded " + stats.getKills().size() + " kills");
 
-        System.out.println("Recorded " + stats.getAircraftHitNotKilledCount() + " aircraft hit but not killed");
-        System.out.println("Recorded " + stats.getAircraftKillCount() + " aircraft kills");
-        System.out.println("Recorded " + stats.getPilotKillCount() + " pilot kills");
+        log.info("Recorded " + stats.getAircraftHitNotKilledCount() + " aircraft hit but not killed");
+        log.info("Recorded " + stats.getAircraftKillCount() + " aircraft kills");
+        log.info("Recorded " + stats.getPilotKillCount() + " pilot kills");
 
-        System.out.println("Recorded " + stats.getNonExplosiveHits() + " non-explosive hits");
-        System.out.println("Recorded " + stats.getUniqueAmmoTypes().toString() + " ammos");
+        log.info("Recorded " + stats.getNonExplosiveHits() + " non-explosive hits");
+        log.info("Recorded " + stats.getUniqueAmmoTypes().toString() + " ammos");
     }
 
+    // T:5 AType:10 PLID:287743 PID:288767 BUL:1200 SH:0 BOMB:0 RCT:0 (188986.344,999.733,138912.453) IDS:a8a19327-93a5-492a-8066-24f32ae0e044 LOGIN:0551fc36-cc61-45ed-9be1-8b393c3abcc7 NAME:Lupson TYPE:Bf 109 G-2 COUNTRY:201 FORM:1 FIELD:0 INAIR:0 PARENT:-1 PAYLOAD:0 FUEL:1.000 SKIN: WM:1
     private void resolveMetaData(Stats stats, List<String> logRows, Integer playerId) {
         for(String row : logRows) {
             if(row.contains(" AType:10 ") && row.contains(" PLID:" + playerId)) {
@@ -140,8 +153,8 @@ public class Parser {
         List<String> playerAsTargetEntries = buildPlayerAsTargetEntries(playerId, logRows);
         for(String entry : playerAsTargetEntries) {
             if(entry.contains("AType:1")) {
-                // T:65095 AType:1 AMMO:SHELL_GER_20x82_AP AID:1865727 TID:822271
 
+                // T:65095 AType:1 AMMO:SHELL_GER_20x82_AP AID:1865727 TID:822271
                 Matcher matcher = aType1Pattern.matcher(entry);
                 while (matcher.find()) {
 
@@ -180,7 +193,7 @@ public class Parser {
 
     private void storeKilledObjectsOnStats(Stats stats, Integer playerId) {
         for(Map.Entry<Integer, GameObject> entry : mappedObjects.entrySet()) {
-            if(entry.getKey() != -1 && !entry.getValue().getGameObjectId().equals(playerId) && entry.getValue().getState() == State.KILLED) {
+            if(entry.getKey() != -1 && !entry.getValue().getGameObjectId().equals(playerId) && entry.getValue().getState() == State.DESTROYED) {
                 if(!stats.getKills().contains(entry.getValue())) {
                     stats.getKills().add(entry.getValue());
                 }
@@ -188,21 +201,22 @@ public class Parser {
         }
     }
 
+    // T:70855 AType:18 BOTID:823295 PARENTID:822271
     private void resolveDestroyedObjects(Stats stats, List<String> logRows) {
         for(Hit h : stats.getHits()) {
-           if(h.getTargetId() != -1 && mappedObjects.get(h.getTargetId()).getState() != State.KILLED) {
+           if(h.getTargetId() != -1 && mappedObjects.get(h.getTargetId()).getState() != State.DESTROYED) {
                 for(String row : logRows) {
                     if(row.contains("AType:18")) {
 
                         if(row.contains("AType:18") && row.contains("PARENTID:" + h.getTargetId())) {
-                            System.out.println("Found AType18 for object: " + mappedObjects.get(h.getTargetId()));
-                            mappedObjects.get(h.getTargetId()).setState(State.KILLED);
+                            log.info("Found AType18 for object: " + mappedObjects.get(h.getTargetId()));
+                            mappedObjects.get(h.getTargetId()).setState(State.DESTROYED);
                             mappedObjects.get(h.getTargetId()).setTimeOfKill(parseTime(row));
 
                             Integer botId = Integer.parseInt(row.substring(row.indexOf("BOTID:") + 6, row.indexOf(" PARENTID:")));
-                            System.out.println("Found AType18 for object: " + mappedObjects.get(botId) + " having row: " + row);
+                            log.info("Found AType18 for object: " + mappedObjects.get(botId) + " having row: " + row);
                             if(mappedObjects.containsKey(botId)) {
-                                mappedObjects.get(botId).setState(State.KILLED);
+                                mappedObjects.get(botId).setState(State.DESTROYED);
                                 mappedObjects.get(botId).setTimeOfKill(parseTime(row));
                                 System.err.println("Warning: Could not find a Mapped Object for botId "+ botId + ". Possibly a pilot that bailed out?");
                             }
@@ -384,6 +398,12 @@ public class Parser {
 
     // T - tick, it is 1/50 of second
     private Integer parseTime(String row) {
-        return Integer.parseInt(row.substring(2, row.indexOf(" AType:")));
+        try {
+            return Integer.parseInt(row.substring(2, row.indexOf(" AType:")));
+        } catch (Exception e) {
+            log.error("Error parsing time from row: " + row);
+            log.error("Message: " + e.getMessage());
+            return 0;
+        }
     }
 }
