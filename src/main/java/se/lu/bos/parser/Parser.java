@@ -48,6 +48,7 @@ public class Parser {
 
         // After looping over player entries, try to find final state of any objects we've hit:
         resolveDestroyedObjects(stats, logRows);
+        resolveIndirectlyDestroyedObjects(stats, logRows, playerId);
 
         storeKilledObjectsOnStats(stats, playerId);
 
@@ -73,6 +74,60 @@ public class Parser {
         logRecordedStats(stats);
 
         return stats;
+    }
+
+    /**
+     * Try to find any AType:3 having -1 as AID. Check back for any damage done or hits on this object.
+     * The attacker with the most hits is awarded the kill.
+     *
+     * Seems as AID:-1 is used when a damaged plane is destroyed due to crash for example
+     *
+     * @param stats
+     * @param logRows
+     */
+    private void resolveIndirectlyDestroyedObjects(Stats stats, List<String> logRows, Integer playerId) {
+
+        for(String row : logRows) {
+            if(row.contains("AType:3") && row.contains("AID:-1")) {
+                // Iterate over hits
+                Integer targetId = Integer.parseInt(row.substring(row.indexOf(" TID:") + 5, row.indexOf(" POS(")));
+                Map<Integer, Integer> attackerHitCountMap = new HashMap<Integer, Integer>();
+                for(Hit h : stats.getHits()) {
+                    if(h.getAttackerId() != -1 && h.getTargetId().equals(targetId)) {
+                        if(attackerHitCountMap.containsKey(h.getAttackerId())) {
+                            Integer val = attackerHitCountMap.get(h.getAttackerId());
+                            val += 1;
+                            attackerHitCountMap.put(h.getAttackerId(), val);
+                        } else {
+                            attackerHitCountMap.put(h.getAttackerId(), 1);
+                        }
+                    }
+                }
+
+                Integer highestNumberOfHitsAttackerId = -1;
+                Integer highestHits = 0;
+                // Create kill if if most hits comes from playerId
+                for(Map.Entry<Integer, Integer> entry : attackerHitCountMap.entrySet()) {
+                    if(entry.getValue() > highestHits) {
+                        highestHits = entry.getValue();
+                        highestNumberOfHitsAttackerId = entry.getKey();
+                    }
+                }
+                if(highestNumberOfHitsAttackerId.equals(playerId) && highestHits > 0) {
+                    // Construct Kill
+
+                    GameObject gameObject = findGameObject(logRows, targetId);
+                    if(!stats.getKills().contains(gameObject)) {
+                        gameObject.setTimeOfKill(parseTime(row));
+                        stats.getKills().add(gameObject);
+                    }
+                    if(!mappedObjects.containsKey(targetId)) {
+                        mappedObjects.put(targetId, gameObject);
+                    }
+                }
+            }
+        }
+
     }
 
     private State resolveFinalPlayerObjectState(List<String> logRows, Integer playerId) {
