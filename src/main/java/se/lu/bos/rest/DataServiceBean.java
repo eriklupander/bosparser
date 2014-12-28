@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import se.lu.bos.dao.StatsDao;
+import se.lu.bos.model.GameObject;
+import se.lu.bos.model.Hit;
+import se.lu.bos.model.State;
 import se.lu.bos.model.Stats;
 import se.lu.bos.rest.dto.TinyReport;
+import se.lu.bos.rest.dto.TotalReport;
 import se.lu.bos.scanner.ReportFileScanner;
 import se.lu.bos.scanner.ReportFileScannerBean;
+import se.lu.bos.util.TimeUtil;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,6 +56,60 @@ public class DataServiceBean {
     @RequestMapping(method = RequestMethod.GET, value = "/reports", produces = "application/json")
     public ResponseEntity<List<Stats>> getAll() {
         return new ResponseEntity(statsDao.getAll(), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/total", produces = "application/json")
+    public ResponseEntity<TotalReport> getTotal() {
+
+        List<Stats> reports = statsDao.getAll();
+
+        TotalReport totalReport = new TotalReport();
+        totalReport.setNumberOfMissions(reports.size());
+        totalReport.setNumberOfMissionsSurvived(reports.stream().filter(tr -> tr.getFinalState() == State.ALIVE).count());
+        totalReport.setNumberOfMissionsDestroyed(reports.stream().filter(tr -> tr.getFinalState() == State.DESTROYED).count());
+
+        int flightTimeSeconds = reports.stream().mapToInt(tr -> TimeUtil.toSeconds(tr.getTotalDuration())).sum();
+        totalReport.setTotalFlightTimeSeconds(flightTimeSeconds);
+        totalReport.setTotalFlightTime(TimeUtil.fromSeconds(flightTimeSeconds));
+
+        TreeMap<Object,Long> kills = reports.stream()
+                .flatMap(tr -> tr.getKills().stream())
+                .sorted((GameObject g1, GameObject g2) -> g1.getType().compareTo(g2.getType()))
+                .collect(Collectors.groupingBy(GameObject::getType, TreeMap::new, Collectors.counting()));
+        totalReport.setNumberOfKillsByTargetType(kills);
+        Object[] objects = kills.entrySet().stream()
+                .sorted((Map.Entry<Object, Long> e1, Map.Entry<Object, Long> e2) -> e2.getValue().compareTo(e1.getValue()))
+                .toArray();
+        totalReport.setNumberOfKillsByTargetTypeSorted(objects);
+        totalReport.setNumberOfKillsByTargetType(kills);
+
+
+        TreeMap missionsPerPlane = reports.stream()
+                .collect(Collectors.groupingBy(Stats::getPilotPlane, TreeMap::new, Collectors.counting()));
+        totalReport.setNumberOfSortiesPerPlaneType(missionsPerPlane);
+
+
+        Map<String, List<Stats>> statsPerPlane = reports.stream()
+                .collect(Collectors.groupingBy((Stats s) -> s.getPilotPlane()));
+        Map<String, Long> map = new HashMap<>();
+        statsPerPlane.forEach((String s, List<Stats> list) -> {
+            map.put(s, list.stream().flatMap(tr -> tr.getKills().stream()).count());
+        });
+        totalReport.setNumberOfKillsInPlaneType(map);
+
+
+        TreeMap < Object, Long > hits = reports.stream()
+        .flatMap(tr -> tr.getHits().stream())
+        .sorted((Hit g1, Hit g2) -> g1.getAmmo().compareTo(g2.getAmmo()))
+        .collect(Collectors.groupingBy(Hit::getAmmo, TreeMap::new, Collectors.counting()));
+        totalReport.setNumberOfHitsByAmmoType(hits);
+        Object[] sortedHits = hits.entrySet().stream()
+                .sorted((Map.Entry<Object, Long> e1, Map.Entry<Object, Long> e2) -> e2.getValue().compareTo(e1.getValue()))
+                .toArray();
+        totalReport.setNumberOfHitsByAmmoTypeSorted(sortedHits);
+
+
+        return new ResponseEntity(totalReport, HttpStatus.OK);
     }
 
 

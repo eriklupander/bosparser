@@ -88,13 +88,14 @@ public class StatsDaoBean implements StatsDao {
     @Override
     public List<TinyReport> getTinyReports() {
         List<TinyReport> list = new ArrayList<TinyReport>();
-        List<Object[]> resultList = em.createQuery("SELECT s.id, s.missionName, s.reportFileDate FROM Stats s").getResultList();
+        List<Object[]> resultList = em.createQuery("SELECT s.id, s.missionName, s.reportFileDate, s.pilotPlane FROM Stats s").getResultList();
         if(resultList != null) {
             for(Object[] row : resultList) {
                 TinyReport tr = new TinyReport();
                 tr.setId((Long) row[0]);
                 tr.setTitle((String) row[1]);
                 tr.setCreated(TimeUtil.parseDate((Date) row[2]));
+                tr.setPilotPlane((String) row[3]);
                 list.add(tr);
             }
         }

@@ -10,6 +10,7 @@ package se.lu.bos.rest.dto;
 public class TinyReport {
     private Long id;
     private String title;
+    private String pilotPlane;
     private String created;
 
     public Long getId() {
@@ -40,5 +41,13 @@ public class TinyReport {
 
     public void setCreated(String created) {
         this.created = created;
+    }
+
+    public String getPilotPlane() {
+        return pilotPlane;
+    }
+
+    public void setPilotPlane(String pilotPlane) {
+        this.pilotPlane = pilotPlane;
     }
 }

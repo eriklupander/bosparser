@@ -29,7 +29,7 @@ var bosparser = new function() {
         $.get('/rest/view/tinyreports', function(data) {
             $('#sidebar').empty();
             for(var a = 0; a < data.length; a++) {
-                var tpl = '<li id="mission_'+data[a].id + '"><a href="#">'+data[a].title + '<div style="font-size:8pt;">'+data[a].created + '</div></a></li>';
+                var tpl = '<li id="mission_'+data[a].id + '"><a href="#">'+data[a].title + '<div style="font-size:8pt;">'+data[a].pilotPlane + '</div><div style="font-size:8pt;">'+data[a].created + '</div></a></li>';
                 $('#sidebar').append(tpl);
                 $('#mission_' + data[a].id).click(
                     function(_id) {
