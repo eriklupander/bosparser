@@ -16,12 +16,12 @@ public class TotalReport {
     private long numberOfMissionsDestroyed;
     private String totalFlightTime;
     private int totalFlightTimeSeconds;
-    private TreeMap<Object, Long> numberOfKillsByTargetType;
+    private TreeMap<Object, Long> numberOfKillsByTargetType = new TreeMap<>();
     private Object[] numberOfKillsByTargetTypeSorted;
     private Object[] numberOfHitsByAmmoTypeSorted;
-    private TreeMap<Object, Long> numberOfHitsByAmmoType;
-    private TreeMap numberOfSortiesPerPlaneType;
-    private Map<String, Long> numberOfKillsInPlaneType;
+    private TreeMap<Object, Long> numberOfHitsByAmmoType = new TreeMap<>();
+    private TreeMap numberOfSortiesPerPlaneType = new TreeMap<>();
+    private Map<String, Long> numberOfKillsInPlaneType = new TreeMap<>();
 
     public void setNumberOfMissions(int numberOfMissions) {
         this.numberOfMissions = numberOfMissions;

@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+import rx.Observable;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.observables.GroupedObservable;
 import se.lu.bos.dao.StatsDao;
 import se.lu.bos.model.GameObject;
 import se.lu.bos.model.Hit;
@@ -20,6 +26,7 @@ import se.lu.bos.rest.dto.TotalReport;
 import se.lu.bos.scanner.ReportFileScanner;
 import se.lu.bos.scanner.ReportFileScannerBean;
 import se.lu.bos.util.TimeUtil;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,6 +82,7 @@ public class DataServiceBean {
         TreeMap<Object,Long> kills = reports.stream()
                 .flatMap(tr -> tr.getKills().stream())
                 .sorted((GameObject g1, GameObject g2) -> g1.getType().compareTo(g2.getType()))
+                .filter(k -> k.getParentId() == -1)
                 .collect(Collectors.groupingBy(GameObject::getType, TreeMap::new, Collectors.counting()));
         totalReport.setNumberOfKillsByTargetType(kills);
         Object[] objects = kills.entrySet().stream()
@@ -112,6 +120,171 @@ public class DataServiceBean {
         return new ResponseEntity(totalReport, HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/totalrx", produces = "application/json")
+    public DeferredResult<TotalReport> getTotalRx() {
+
+        DeferredResult<TotalReport> result = new DeferredResult<>();
+
+        List<Stats> reports = statsDao.getAll();
+
+
+        TotalReport totalReport = buildAggregateReportUsingRx(reports);
+
+
+//        TreeMap<Object,Long> kills = reports.stream()
+//                .flatMap(tr -> tr.getKills().stream())
+//                .sorted((GameObject g1, GameObject g2) -> g1.getType().compareTo(g2.getType()))
+//                .filter(k -> k.getParentId() == -1)
+//                .collect(Collectors.groupingBy(GameObject::getType, TreeMap::new, Collectors.counting()));
+//        totalReport.setNumberOfKillsByTargetType(kills);
+//
+//
+//
+//        TreeMap missionsPerPlane = reports.stream()
+//                .collect(Collectors.groupingBy(Stats::getPilotPlane, TreeMap::new, Collectors.counting()));
+//        totalReport.setNumberOfSortiesPerPlaneType(missionsPerPlane);
+//
+//
+//        Map<String, List<Stats>> statsPerPlane = reports.stream()
+//                .collect(Collectors.groupingBy((Stats s) -> s.getPilotPlane()));
+//        Map<String, Long> map = new HashMap<>();
+//        statsPerPlane.forEach((String s, List<Stats> list) -> {
+//            map.put(s, list.stream().flatMap(tr -> tr.getKills().stream()).count());
+//        });
+//        totalReport.setNumberOfKillsInPlaneType(map);
+//
+//
+//        TreeMap < Object, Long > hits = reports.stream()
+//                .flatMap(tr -> tr.getHits().stream())
+//                .sorted((Hit g1, Hit g2) -> g1.getAmmo().compareTo(g2.getAmmo()))
+//                .collect(Collectors.groupingBy(Hit::getAmmo, TreeMap::new, Collectors.counting()));
+//        totalReport.setNumberOfHitsByAmmoType(hits);
+//        Object[] sortedHits = hits.entrySet().stream()
+//                .sorted((Map.Entry<Object, Long> e1, Map.Entry<Object, Long> e2) -> e2.getValue().compareTo(e1.getValue()))
+//                .toArray();
+//        totalReport.setNumberOfHitsByAmmoTypeSorted(sortedHits);
+
+        return result;
+        //return new ResponseEntity(totalReport, HttpStatus.OK);
+    }
+
+    TotalReport buildAggregateReportUsingRx(List<Stats> reports) {
+
+        final TotalReport totalReport = new TotalReport();
+
+
+        totalReport.setNumberOfMissions(reports.size());
+
+        //totalReport.setNumberOfMissionsSurvived(reports.stream().filter(tr -> tr.getFinalState() == State.ALIVE).count());
+        Observable.from(reports)
+                .filter(new Func1<Stats, Boolean>() {
+                    @Override
+                    public Boolean call(Stats stats) {
+                        return stats.getFinalState() == State.ALIVE;
+                    }
+                }).count().subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                totalReport.setNumberOfMissionsSurvived(integer.longValue());
+            }
+        });
+
+
+        //totalReport.setNumberOfMissionsDestroyed(reports.stream().filter(tr -> tr.getFinalState() == State.DESTROYED).count());
+        Observable.from(reports)
+                .filter(new Func1<Stats, Boolean>() {
+                    @Override
+                    public Boolean call(Stats stats) {
+                        return stats.getFinalState() == State.DESTROYED;
+                    }
+                }).count().subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                totalReport.setNumberOfMissionsDestroyed(integer.longValue());
+            }
+        });
+
+//        int flightTimeSeconds = reports.stream().mapToInt(tr -> TimeUtil.toSeconds(tr.getTotalDuration())).sum();
+//        totalReport.setTotalFlightTimeSeconds(flightTimeSeconds);
+//        totalReport.setTotalFlightTime(TimeUtil.fromSeconds(flightTimeSeconds));
+        Observable<Integer> durationObservable = Observable.from(reports).map(new Func1<Stats, Integer>() {
+            @Override
+            public Integer call(Stats stats) {
+                return TimeUtil.toSeconds(stats.getTotalDuration());
+            }
+        });
+        rx.observables.MathObservable.sumInteger(durationObservable).subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer flightTimeSeconds) {
+                totalReport.setTotalFlightTimeSeconds(flightTimeSeconds);
+                totalReport.setTotalFlightTime(TimeUtil.fromSeconds(flightTimeSeconds));
+            }
+        });
+
+
+        Observable<GroupedObservable<Object, GameObject>> grouped= Observable.from(reports).flatMap(new Func1<Stats, Observable<GameObject>>() {
+            @Override
+            public Observable<GameObject> call(Stats stats) {
+                return Observable.from(stats.getKills());
+            }
+        }).filter(new Func1<GameObject, Boolean>() {
+            @Override
+            public Boolean call(GameObject o) {
+                return o.getParentId() == -1;
+            }
+        }).groupBy(new Func1<Object, Object>() {
+            @Override
+            public Object call(Object o) {
+                return ((GameObject) o).getType();
+            }
+        });
+
+        grouped.forEach(new Action1<GroupedObservable<Object, GameObject>>() {
+
+            @Override
+            public void call(GroupedObservable<Object, GameObject> objectGameObjectGroupedObservable) {
+                final Object key = objectGameObjectGroupedObservable.getKey();
+                objectGameObjectGroupedObservable.count().subscribe(new Action1<Integer>() {
+
+                    @Override
+                    public void call(Integer integer) {
+                        totalReport.getNumberOfKillsByTargetType().put(key, integer.longValue());
+                    }
+                });
+            }
+        });
+
+
+        // TreeMap missionsPerPlane = reports.stream()
+        // .collect(Collectors.groupingBy(Stats::getPilotPlane, TreeMap::new, Collectors.counting()));
+        // totalReport.setNumberOfSortiesPerPlaneType(missionsPerPlane);
+        Observable.from(reports)
+                .groupBy(new Func1<Stats, Object>() {
+                    @Override
+                    public Object call(Stats o) {
+                        return o.getPilotPlane();
+                    }
+                }).forEach(new Action1<GroupedObservable<Object, Stats>>() {
+            @Override
+            public void call(GroupedObservable<Object, Stats> objectStatsGroupedObservable) {
+                final Object key = objectStatsGroupedObservable.getKey();
+                objectStatsGroupedObservable.count().subscribe(new Action1<Integer>() {
+
+                    @Override
+                    public void call(Integer integer) {
+                        totalReport.getNumberOfSortiesPerPlaneType().put(key, integer.longValue());
+                    }
+                });
+            }
+        });
+
+
+
+
+
+        return totalReport;
+    }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/tinyreports", produces = "application/json")
     public ResponseEntity<List<TinyReport>> getAllTiny() {
@@ -138,4 +311,8 @@ public class DataServiceBean {
         return new ResponseEntity("Deleted " + deletedReports + " mission reports", HttpStatus.OK);
     }
 
+    // Spring setter, also for unit testing
+    public void setStatsDao(StatsDao statsDao) {
+        this.statsDao = statsDao;
+    }
 }
