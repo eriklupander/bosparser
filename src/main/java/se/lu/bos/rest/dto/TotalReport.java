@@ -11,40 +11,41 @@ import java.util.TreeMap;
  * To change this template use File | Settings | File Templates.
  */
 public class TotalReport {
-    private int numberOfMissions;
-    private Long numberOfMissionsSurvived;
-    private long numberOfMissionsDestroyed;
+    private int missions;
+    private Long missionsSurvived;
+    private long missionsDestroyed;
     private String totalFlightTime;
     private int totalFlightTimeSeconds;
-    private TreeMap<Object, Long> numberOfKillsByTargetType = new TreeMap<>();
-    private Object[] numberOfKillsByTargetTypeSorted;
-    private Object[] numberOfHitsByAmmoTypeSorted;
-    private TreeMap<Object, Long> numberOfHitsByAmmoType = new TreeMap<>();
-    private TreeMap numberOfSortiesPerPlaneType = new TreeMap<>();
-    private Map<String, Long> numberOfKillsInPlaneType = new TreeMap<>();
+    private int kills;
+    private int hits;
+    private TreeMap<Object, Long> killsByTargetType = new TreeMap<Object, Long>();
+    private TreeMap<Object, Long> hitsByAmmoType = new TreeMap<Object, Long>();
+    private TreeMap sortiesPerPlaneType = new TreeMap<Object, Long>();
+    private Map<String, Long> killsInPlaneType = new TreeMap<String, Long>();
 
-    public void setNumberOfMissions(int numberOfMissions) {
-        this.numberOfMissions = numberOfMissions;
+
+    public void setMissions(int missions) {
+        this.missions = missions;
     }
 
-    public int getNumberOfMissions() {
-        return numberOfMissions;
+    public int getMissions() {
+        return missions;
     }
 
-    public void setNumberOfMissionsSurvived(Long numberOfMissionsSurvived) {
-        this.numberOfMissionsSurvived = numberOfMissionsSurvived;
+    public void setMissionsSurvived(Long missionsSurvived) {
+        this.missionsSurvived = missionsSurvived;
     }
 
-    public Long getNumberOfMissionsSurvived() {
-        return numberOfMissionsSurvived;
+    public Long getMissionsSurvived() {
+        return missionsSurvived;
     }
 
-    public void setNumberOfMissionsDestroyed(long numberOfMissionsDestroyed) {
-        this.numberOfMissionsDestroyed = numberOfMissionsDestroyed;
+    public void setMissionsDestroyed(long missionsDestroyed) {
+        this.missionsDestroyed = missionsDestroyed;
     }
 
-    public long getNumberOfMissionsDestroyed() {
-        return numberOfMissionsDestroyed;
+    public long getMissionsDestroyed() {
+        return missionsDestroyed;
     }
 
     public String getTotalFlightTime() {
@@ -63,51 +64,51 @@ public class TotalReport {
         this.totalFlightTimeSeconds = totalFlightTimeSeconds;
     }
 
-    public TreeMap<Object, Long> getNumberOfKillsByTargetType() {
-        return numberOfKillsByTargetType;
+    public TreeMap<Object, Long> getKillsByTargetType() {
+        return killsByTargetType;
     }
 
-    public void setNumberOfKillsByTargetType(TreeMap<Object, Long> numberOfKillsByTargetType) {
-        this.numberOfKillsByTargetType = numberOfKillsByTargetType;
+    public void setKillsByTargetType(TreeMap<Object, Long> killsByTargetType) {
+        this.killsByTargetType = killsByTargetType;
     }
 
-    public Object[] getNumberOfKillsByTargetTypeSorted() {
-        return numberOfKillsByTargetTypeSorted;
+    public void setHitsByAmmoType(TreeMap<Object, Long> hitsByAmmoType) {
+        this.hitsByAmmoType = hitsByAmmoType;
     }
 
-    public void setNumberOfKillsByTargetTypeSorted(Object[] numberOfKillsByTargetTypeSorted) {
-        this.numberOfKillsByTargetTypeSorted = numberOfKillsByTargetTypeSorted;
+    public TreeMap<Object, Long> getHitsByAmmoType() {
+        return hitsByAmmoType;
     }
 
-    public void setNumberOfHitsByAmmoTypeSorted(Object[] numberOfHitsByAmmoTypeSorted) {
-        this.numberOfHitsByAmmoTypeSorted = numberOfHitsByAmmoTypeSorted;
+    public void setSortiesPerPlaneType(TreeMap sortiesPerPlaneType) {
+        this.sortiesPerPlaneType = sortiesPerPlaneType;
     }
 
-    public Object[] getNumberOfHitsByAmmoTypeSorted() {
-        return numberOfHitsByAmmoTypeSorted;
+    public TreeMap getSortiesPerPlaneType() {
+        return sortiesPerPlaneType;
     }
 
-    public void setNumberOfHitsByAmmoType(TreeMap<Object, Long> numberOfHitsByAmmoType) {
-        this.numberOfHitsByAmmoType = numberOfHitsByAmmoType;
+    public void setKillsInPlaneType(Map<String, Long> killsInPlaneType) {
+        this.killsInPlaneType = killsInPlaneType;
     }
 
-    public TreeMap<Object, Long> getNumberOfHitsByAmmoType() {
-        return numberOfHitsByAmmoType;
+    public Map<String, Long> getKillsInPlaneType() {
+        return killsInPlaneType;
     }
 
-    public void setNumberOfSortiesPerPlaneType(TreeMap numberOfSortiesPerPlaneType) {
-        this.numberOfSortiesPerPlaneType = numberOfSortiesPerPlaneType;
+    public int getKills() {
+        return kills;
     }
 
-    public TreeMap getNumberOfSortiesPerPlaneType() {
-        return numberOfSortiesPerPlaneType;
+    public void setKills(int kills) {
+        this.kills = kills;
     }
 
-    public void setNumberOfKillsInPlaneType(Map<String, Long> numberOfKillsInPlaneType) {
-        this.numberOfKillsInPlaneType = numberOfKillsInPlaneType;
+    public void setHits(int hits) {
+        this.hits = hits;
     }
 
-    public Map<String, Long> getNumberOfKillsInPlaneType() {
-        return numberOfKillsInPlaneType;
+    public int getHits() {
+        return hits;
     }
 }

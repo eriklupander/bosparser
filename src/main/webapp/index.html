@@ -26,8 +26,8 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#" id="scanbtn">Scan for reports</a>
-        <a class="navbar-brand" href="#" id="deletebtn">Delete all reports</a>
+        <a class="navbar-brand" href="#" id="missions-btn">Missions</a>
+        <a class="navbar-brand" href="#" id="career-btn">Career stats</a>
     </div>
     <!-- /.container -->
 </div>
@@ -41,7 +41,8 @@
         <div class="row">
             <div class="col col-lg-12 col-sm-12">
                 <h1>BoS Mission Debriefing</h1>
-
+                <button class="btn btn-info" href="#" id="scanbtn">Scan for reports</button>
+                <button class="btn btn-danger" href="#" id="deletebtn">Delete all reports</button>
             </div>
         </div>
     </div>
@@ -50,8 +51,10 @@
 
 <!-- CONTENT
 =================================-->
+
+<!-- Missions page -->
 <div class="container">
-    <div class="row">
+    <div id="missions-panel" class="row">
         <div class="col-md-3" id="leftCol">
 
             <div class="well">
@@ -161,30 +164,119 @@
                         </div>
                     </div>
                 </div>
-               <!-- NOT COMPLETE YET
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading"><h3>All objects registered in mission</h3></div>
-                        <div class="panel-body">
+                <!-- NOT COMPLETE YET
+                 <div class="col-md-12">
+                     <div class="panel panel-default">
+                         <div class="panel-heading"><h3>All objects registered in mission</h3></div>
+                         <div class="panel-body">
 
 
-                            <div id="objtree" class="tree well">
+                             <div id="objtree" class="tree well">
 
-                            </div>
-                        </div>
+                             </div>
+                         </div>
 
-                    </div>
-                </div>
-                 -->
+                     </div>
+                 </div>
+                  -->
             </div>
         </div>
         <hr>
-
+        <!-- End missions page -->
     </div>
+
+    <div class="row hidden" id="career-panel">
+        <div class="col-md-12">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Overall statistics</h3></div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-2 th">Missions flown</div>
+                                <div class="col-md-2" id="missions"></div>
+                                <div class="col-md-2 th">Time flown</div>
+                                <div class="col-md-4" id="totalDuration"></div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 th">Player Survived</div>
+                                <div class="col-md-2" id="missionsSurvived"></div>
+                                <div class="col-md-2 th">Kills</div>
+                                <div class="col-md-2" id="killCount"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 th">Player Destroyed</div>
+                                <div class="col-md-2" id="missionsDestroyed"></div>
+                                <div class="col-md-2 th">Hits</div>
+                                <div class="col-md-2" id="hitCount"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Sorties by aircraft type</h3></div>
+                        <div class="panel-body" id="sorties-table">
+                            <div class="row">
+                                <div class="col-md-6 th">Aircraft</div>
+                                <div class="col-md-6 th">Sorties</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Victories in each aircraft type</h3></div>
+                        <div class="panel-body"  id="victories-table">
+                            <div class="row">
+                                <div class="col-md-6 th">Aircraft</div>
+                                <div class="col-md-6 th">Victories</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Kills by object type</h3></div>
+                        <div class="panel-body" id="killsbytype-table">
+                            <div class="row">
+                                <div class="col-md-6 th">Aircraft</div>
+                                <div class="col-md-6 th">Kills</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3>Hits by ammunition type</h3></div>
+                        <div class="panel-body"  id="ammo-table">
+                            <div class="row">
+                                <div class="col-md-6 th">Ammunition</div>
+                                <div class="col-md-6 th">Hits</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 </div>
-<hr>
-<!-- /CONTENT ============-->
-</div>
+
+
+
+
+
+    <hr>
+    <!-- /CONTENT ============-->
+
 <!-- script references -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
@@ -214,9 +306,17 @@
 </div><!-- /.modal -->
 
 
+
+<div class="modal"><!-- Place at bottom of page --></div>
+
+
 <script>
+    $body = $("body");
+
     $('#scanbtn').click(bosparser.scan);
     $('#deletebtn').click(bosparser.deleteAll);
+    $('#missions-btn').click(bosparser.populateSidebar);
+    $('#career-btn').click(bosparser.populateCareer);
     bosparser.populateSidebar();
 
 

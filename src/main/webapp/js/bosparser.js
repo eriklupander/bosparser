@@ -2,30 +2,48 @@ var bosparser = new function() {
 
 
     this.scan = function() {
+        $('#scanbtn').attr('disabled','disabled');
+        $body.addClass("loading");
         $.ajax({
             'method' : 'POST',
             'url' : '/rest/view/reports',
             'complete' : function(data) {
                 $('#modal-content').html(data.responseText);
+                $('#scanbtn').removeAttr('disabled');
+                $body.removeClass("loading");
                 $('#myModal').modal({show:true});
                 bosparser.populateSidebar();
+
+            },
+            'error' : function() {
+                $('#scanbtn').removeAttr('disabled');
+                $body.removeClass("loading");
             }
         });
     }
 
     this.deleteAll = function() {
+        $body.addClass("loading");
         $.ajax({
             'method' : 'DELETE',
             'url' : '/rest/view/reports',
             'complete' : function(data) {
+                $body.removeClass("loading");
                 $('#modal-content').html(data.responseText);
                 $('#myModal').modal({show:true});
                 bosparser.populateSidebar();
+
+            } ,
+            'error' : function() {
+                $('#scanbtn').removeAttr('disabled');
+                $body.removeClass("loading");
             }
         });
     }
 
     this.populateSidebar = function() {
+        $('#missions-panel').removeClass('hidden');
+        $('#career-panel').addClass('hidden');
         $.get('/rest/view/tinyreports', function(data) {
             $('#sidebar').empty();
             for(var a = 0; a < data.length; a++) {
@@ -198,6 +216,86 @@ var bosparser = new function() {
             }
         }
         return cnt;
+    }
+
+    var sortMap = function(map) {
+        var tuples = [];
+        for (var key in map) tuples.push([key, map[key]]);
+
+        tuples.sort(function(a, b) {
+            a = a[1];
+            b = b[1];
+
+            return a < b ? 1 : (a > b ? -1 : 0);
+        });
+        return tuples;
+    }
+
+
+
+
+
+    this.populateCareer = function() {
+        $('#missions-panel').addClass('hidden');
+        $('#career-panel').removeClass('hidden');
+        $.get('/rest/view/totalrx', function(data) {
+
+            $('#missions').html(data.missions);
+            $('#totalDuration').html(data.totalFlightTime);
+            $('#missionsSurvived').html(data.missionsSurvived);
+            $('#missionsDestroyed').html(data.missionsDestroyed);
+            $('#killCount').html(data.kills);
+            $('#hitCount').html(data.hits);
+
+            var sorties = sortMap(data.sortiesPerPlaneType);
+            $('#sorties-table').find(".itemrow").remove();
+
+            for(var a = 0; a < sorties.length; a++) {
+                var sortie = sorties[a];
+                var tpl = '<div class="row itemrow">';
+                tpl +=  '<div class="col-md-6">' + sortie[0] + '</div>';
+                tpl +=  '<div class="col-md-6">' + sortie[1] + '</div>';
+                tpl +=  '</div>';
+                $('#sorties-table').append(tpl);
+            }
+
+            var victories = sortMap(data.killsInPlaneType);
+            $('#victories-table').find(".itemrow").remove();
+
+            for(var a = 0; a < victories.length; a++) {
+                var victory = victories[a];
+                var tpl = '<div class="row itemrow">';
+                tpl +=  '<div class="col-md-6">' + victory[0] + '</div>';
+                tpl +=  '<div class="col-md-6">' + victory[1] + '</div>';
+                tpl +=  '</div>';
+                $('#victories-table').append(tpl);
+            }
+
+            var kills = sortMap(data.killsByTargetType);
+            $('#killsbytype-table').find(".itemrow").remove();
+
+            for(var a = 0; a < kills.length; a++) {
+                var kill = kills[a];
+                var tpl = '<div class="row itemrow">';
+                tpl +=  '<div class="col-md-6">' + kill[0] + '</div>';
+                tpl +=  '<div class="col-md-6">' + kill[1] + '</div>';
+                tpl +=  '</div>';
+                $('#killsbytype-table').append(tpl);
+            }
+
+
+            var ammos = sortMap(data.hitsByAmmoType);
+            $('#ammo-table').find(".itemrow").remove();
+
+            for(var a = 0; a < ammos.length; a++) {
+                var ammo = ammos[a];
+                var tpl = '<div class="row itemrow">';
+                tpl +=  '<div class="col-md-6">' + ammo[0] + '</div>';
+                tpl +=  '<div class="col-md-6">' + ammo[1] + '</div>';
+                tpl +=  '</div>';
+                $('#ammo-table').append(tpl);
+            }
+        });
     }
 
 };

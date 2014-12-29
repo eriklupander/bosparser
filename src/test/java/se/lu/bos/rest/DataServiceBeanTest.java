@@ -2,7 +2,6 @@ package se.lu.bos.rest;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import se.lu.bos.dao.StatsDao;
 import se.lu.bos.model.*;
 import se.lu.bos.rest.dto.TotalReport;
 
@@ -38,15 +37,23 @@ public class DataServiceBeanTest {
 
         TotalReport totalReport = testee.buildAggregateReportUsingRx(buildStatsList());
         assertNotNull(totalReport);
-        assertEquals(totalReport.getNumberOfMissions(), 2);
-        assertEquals(totalReport.getNumberOfMissionsSurvived().longValue(), 2);
-        assertEquals(totalReport.getNumberOfMissionsDestroyed(), 0);
-        assertEquals(totalReport.getNumberOfKillsByTargetType().size(), 3);
-        assertTrue(totalReport.getNumberOfKillsByTargetType().keySet().contains("IL-2 mod.42"));
-        assertTrue(totalReport.getNumberOfKillsByTargetType().keySet().contains("Lagg-3"));
-        assertTrue(totalReport.getNumberOfKillsByTargetType().keySet().contains("Pe-2"));
-        assertEquals(totalReport.getNumberOfSortiesPerPlaneType().size(), 1);
-        assertTrue(totalReport.getNumberOfSortiesPerPlaneType().keySet().contains("FW-190A3"));
+        assertEquals(totalReport.getMissions(), 2);
+        assertEquals(totalReport.getMissionsSurvived().longValue(), 2);
+        assertEquals(totalReport.getMissionsDestroyed(), 0);
+        assertEquals(totalReport.getKills(), 6);
+        assertEquals(totalReport.getHits(), 6);
+        assertEquals(totalReport.getKillsByTargetType().size(), 3);
+        assertTrue(totalReport.getKillsByTargetType().keySet().contains("IL-2 mod.42"));
+        assertTrue(totalReport.getKillsByTargetType().keySet().contains("Lagg-3"));
+        assertTrue(totalReport.getKillsByTargetType().keySet().contains("Pe-2"));
+
+        assertEquals(totalReport.getSortiesPerPlaneType().size(), 1);
+
+        assertTrue(totalReport.getSortiesPerPlaneType().keySet().contains("FW-190A3"));
+        assertEquals(totalReport.getSortiesPerPlaneType().values().iterator().next().toString(), "2");
+
+        assertEquals(totalReport.getKillsInPlaneType().size(), 1);
+        assertEquals(totalReport.getKillsInPlaneType().values().iterator().next().toString(), "6");
     }
 
     private List<Stats> buildStatsList() {
@@ -75,6 +82,7 @@ public class DataServiceBeanTest {
             hit.setAmmo("7.92 AP");
             hit.setAttacker("FW-190A3");
             hit.setTarget("IL-2 mod.42");
+            hit.setTime(System.currentTimeMillis());
 
             hits.add(hit);
         }
