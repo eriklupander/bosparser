@@ -1,4 +1,4 @@
-.modal {
+.modalspinner {
     display:    none;
     position:   fixed;
     z-index:    1000;
@@ -6,7 +6,7 @@
     left:       0;
     height:     100%;
     width:      100%;
-     background: rgba( 255, 255, 255, .0 )
+     background: rgba( 255, 255, 255, .1 )
     url('/images/ajax-loader.gif')
     50% 50%
     no-repeat;
@@ -20,7 +20,7 @@ body.loading {
 
 /* Anytime the body has the loading class, our
    modal element will be visible */
-body.loading .modal {
+body.loading .modalspinner {
     display: block;
 }
 

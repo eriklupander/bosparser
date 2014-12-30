@@ -46,26 +46,30 @@ var bosparser = new function() {
         $('#career-panel').addClass('hidden');
         $.get('/rest/view/tinyreports', function(data) {
             $('#sidebar').empty();
-            for(var a = 0; a < data.length; a++) {
-                var tpl = '<li id="mission_'+data[a].id + '"><a href="#">'+data[a].title + '<div style="font-size:8pt;">'+data[a].pilotPlane + '</div><div style="font-size:8pt;">'+data[a].created + '</div></a></li>';
-                $('#sidebar').append(tpl);
-                $('#mission_' + data[a].id).click(
-                    function(_id) {
-                       return function() {
-                           bosparser.populateMission(_id);
-                       }
-                    }(data[a].id)
+            if(data.length > 0) {
+                for(var a = 0; a < data.length; a++) {
+                    var tpl = '<li id="mission_'+data[a].id + '"><a href="#">'+data[a].title + '<div style="font-size:8pt;">'+data[a].pilotPlane + '</div><div style="font-size:8pt;">'+data[a].created + '</div></a></li>';
+                    $('#sidebar').append(tpl);
+                    $('#mission_' + data[a].id).click(
+                        function(_id) {
+                            return function() {
+                                bosparser.populateMission(_id);
+                            }
+                        }(data[a].id)
 
-                );
+                    );
+                }
+            } else {
+                $('#sidebar').html('No reports scanned yet');
             }
+
         });
     }            //<li><a href="#sec1">Section 1</a></li>
 
     this.populateMission = function(missionid) {
+        $('#clickme').addClass("hidden");
+        $('#missions-inner').removeClass('hidden');
         if(missionid == null) return;
-        if(typeof console.log != 'undefined' && console.log !=  null) {
-            console.log("Loading mission " + missionid);
-        }
 
         $.get('/rest/view/reports/' + missionid, function(data) {
 
