@@ -187,6 +187,11 @@ public class Parser {
                 // NAME:Lupson TYPE:Bf 109 G-2
                 stats.setPilotName(row.substring(row.indexOf(" NAME:")+6, row.indexOf(" TYPE:")));
                 stats.setPilotPlane(row.substring(row.indexOf(" TYPE:")+6, row.indexOf(" COUNTRY:")));
+                Float[] pos = parsePos(row);
+                if(pos != null && pos.length == 3) {
+                    mappedObjects.get(playerId).setSpawnedXPos(pos[0]);
+                    mappedObjects.get(playerId).setSpawnedZPos(pos[2]);
+                }
             }
 
             if(row.contains(" AType:4 ")) {
@@ -326,6 +331,12 @@ public class Parser {
                 GameObject gameObject = findGameObject(logRows, targetId);
                 if(!stats.getKills().contains(gameObject)) {
                     gameObject.setTimeOfKill(parseTime(entry));
+                    Float[] pos = parsePos(entry);
+                    if(pos != null && pos.length == 3) {
+                        gameObject.setKilledXPos(pos[0]);
+                        gameObject.setKilledZPos(pos[2]);
+                    }
+
                     stats.getKills().add(gameObject);
                 }
                 if(!mappedObjects.containsKey(targetId)) {
@@ -333,6 +344,19 @@ public class Parser {
                 }
             }
         }
+    }
+
+    private Float[] parsePos(String row) {
+        if(!row.contains(" POS(")) {
+            return null;
+        }
+        String posData = row.substring(row.indexOf(" POS(")+5, row.lastIndexOf(")")-1);
+        String[] parts = posData.split(",");
+        Float[] res = new Float[3];
+        res[0] = Float.parseFloat(parts[0]);
+        res[1] = Float.parseFloat(parts[1]);
+        res[2] = Float.parseFloat(parts[2]);
+        return res;
     }
 
     private GameObject findRootGameObject(List<String> logRows, Integer targetId) {

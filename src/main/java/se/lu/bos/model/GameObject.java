@@ -43,6 +43,40 @@ public class GameObject {
 
     private Integer timeOfKill;
 
+    private float spawnedXPos, spawnedZPos;
+    private float killedXPos, killedZPos;
+
+    public float getSpawnedXPos() {
+        return spawnedXPos;
+    }
+
+    public void setSpawnedXPos(float spawnedXPos) {
+        this.spawnedXPos = spawnedXPos;
+    }
+
+    public float getSpawnedZPos() {
+        return spawnedZPos;
+    }
+
+    public void setSpawnedZPos(float spawnedZPos) {
+        this.spawnedZPos = spawnedZPos;
+    }
+
+    public float getKilledXPos() {
+        return killedXPos;
+    }
+
+    public void setKilledXPos(float killedXPos) {
+        this.killedXPos = killedXPos;
+    }
+
+    public float getKilledZPos() {
+        return killedZPos;
+    }
+
+    public void setKilledZPos(float killedZPos) {
+        this.killedZPos = killedZPos;
+    }
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<GameObject> children = new ArrayList<GameObject>();
