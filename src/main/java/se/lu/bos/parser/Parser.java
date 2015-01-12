@@ -119,6 +119,11 @@ public class Parser {
                     GameObject gameObject = findGameObject(logRows, targetId);
                     if(!stats.getKills().contains(gameObject)) {
                         gameObject.setTimeOfKill(parseTime(row));
+                        FlightPosition fp = parseFlightPosition(row);
+                        if(fp != null) {
+                            gameObject.setKilledXPos(fp.getX());
+                            gameObject.setKilledZPos(fp.getZ());
+                        }
                         stats.getKills().add(gameObject);
                     }
                     if(!mappedObjects.containsKey(targetId)) {
@@ -206,6 +211,10 @@ public class Parser {
                 stats.setGameTime(TimeUtil.pad(row.substring(row.indexOf(" GTime:") + 7, row.indexOf(" MFile:"))));
                 stats.setMissionName(row.substring(row.indexOf(" MFile:") + 7, row.indexOf(" MID:")));
             }
+
+            if(row.contains(" AType:17 ")) {
+                stats.getFlightTrack().add(parseFlightPosition(row));
+            }
         }
     }
 
@@ -269,16 +278,18 @@ public class Parser {
                     if(row.contains("AType:18")) {
 
                         if(row.contains("AType:18") && row.contains("PARENTID:" + h.getTargetId())) {
-                            log.info("Found AType18 for object: " + mappedObjects.get(h.getTargetId()));
-                            mappedObjects.get(h.getTargetId()).setState(State.DESTROYED);
+                           mappedObjects.get(h.getTargetId()).setState(State.DESTROYED);
                             mappedObjects.get(h.getTargetId()).setTimeOfKill(parseTime(row));
 
                             Integer botId = Integer.parseInt(row.substring(row.indexOf("BOTID:") + 6, row.indexOf(" PARENTID:")));
-                            log.info("Found AType18 for object: " + mappedObjects.get(botId) + " having row: " + row);
-                            if(mappedObjects.containsKey(botId)) {
+                           if(mappedObjects.containsKey(botId)) {
                                 mappedObjects.get(botId).setState(State.DESTROYED);
                                 mappedObjects.get(botId).setTimeOfKill(parseTime(row));
-                                System.err.println("Warning: Could not find a Mapped Object for botId "+ botId + ". Possibly a pilot that bailed out?");
+                                FlightPosition fp = parseFlightPosition(row);
+                                if(fp != null) {
+                                    mappedObjects.get(botId).setKilledXPos(fp.getX());
+                                    mappedObjects.get(botId).setKilledZPos(fp.getZ());
+                                }
                             }
 
                         }
@@ -343,6 +354,22 @@ public class Parser {
                     mappedObjects.put(targetId, gameObject);
                 }
             }
+        }
+    }
+
+    // T:41069 AType:17 ID:138239 POS(226705.891,3185.417,355836.938)
+    private FlightPosition parseFlightPosition(String row) {
+        try {
+            FlightPosition fp = new FlightPosition();
+            fp.setMissionTime(parseTime(row));
+            Float[] pos = parsePos(row);
+            fp.setX(pos[0]);
+            fp.setY(pos[1]);
+            fp.setZ(pos[2]);
+            return fp;
+        } catch (Exception e) {
+            log.warn("Failed to parse position from row '" + row + "', returning null");
+            return null;
         }
     }
 

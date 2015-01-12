@@ -1,4 +1,4 @@
-package se.lu.bos.model.ext;
+package se.lu.bos.ext;
 
 /**
  * This class should take "war state" and render it onto a high-res map of the stalingrad area.

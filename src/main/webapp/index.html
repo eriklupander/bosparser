@@ -43,6 +43,7 @@
                 <h1>BoS Mission Debriefing</h1>
                 <button class="btn btn-info" href="#" id="scanbtn">Scan for reports</button>
                 <button class="btn btn-danger" href="#" id="deletebtn">Delete all reports</button>
+                <button class="btn btn-success disabled" href="#" id="mapbtn">Show map</button>
                 <p class="hidden"><img src="/images/ajax-loader.gif"></p>
             </div>
         </div>
@@ -181,6 +182,7 @@
               -->
         </div>
     </div>
+
     <div id="clickon" class="">Click on a mission to display stats</div>
     <hr>
     <!-- End missions page -->
@@ -270,20 +272,18 @@
             </div>
         </div>
     </div>
+
 </div>
 
     <hr>
     <!-- /CONTENT ============-->
-<div id="mapcontainer">
-    <canvas id="map" width="4670" height="4250" class="hidden">
 
-    </canvas>
-</div>
 
-    <!-- script references -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/bosparser.js"></script>
+<!-- script references -->
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bosparser.js"></script>
+<script src="map/maprenderer.js"></script>
+
 </body>
 </html>
 
@@ -300,6 +300,29 @@
                 <p id="modal-content"></p>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="mapModal">
+    <div id="mapModalDialog" class="modal-fullscreen-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4 class="modal-title">Mission map</h4>
+            </div>
+            <div class="modal-body"  style="text-align:center;">
+                <p id="map-modal-content">
+                    <span style="font-size:10pt;">Pan by holding left mouse button while dragging, zoom using scroll wheel or by pressing right mouse button while dragging</span>
+                    <canvas id="map">
+                    </canvas>
+
+                </p>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>

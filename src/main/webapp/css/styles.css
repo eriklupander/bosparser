@@ -6,8 +6,8 @@
     left:       0;
     height:     100%;
     width:      100%;
-     background: rgba( 255, 255, 255, .1 )
-    url('/images/ajax-loader.gif')
+    background: rgba( 255, 255, 255, .1 )
+    url('../images/ajax-loader.gif')
     50% 50%
     no-repeat;
 }
@@ -26,4 +26,27 @@ body.loading .modalspinner {
 
 .th {
     font-weight:bold;
+}
+
+/*
+#mapModalDialog {
+    width: auto !important;
+    margin: 30px !important;
+}
+*/
+/*
+.modal-dialog {
+    width: 98%;
+    height: 95%;
+    padding: 0;
+}
+*/
+.modal-fullscreen-dialog {
+    width: 98%;
+    height: 95%;
+    margin: 20px;
+}
+.modal-content {
+    height: 100%;
+    border-radius: 0;
 }

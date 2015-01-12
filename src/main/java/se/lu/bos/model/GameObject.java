@@ -43,38 +43,40 @@ public class GameObject {
 
     private Integer timeOfKill;
 
-    private float spawnedXPos, spawnedZPos;
-    private float killedXPos, killedZPos;
+    private Float spawnedXPos;
+    private Float spawnedZPos;
+    private Float killedXPos;
+    private Float killedZPos;
 
-    public float getSpawnedXPos() {
+    public Float getSpawnedXPos() {
         return spawnedXPos;
     }
 
-    public void setSpawnedXPos(float spawnedXPos) {
+    public void setSpawnedXPos(Float spawnedXPos) {
         this.spawnedXPos = spawnedXPos;
     }
 
-    public float getSpawnedZPos() {
+    public Float getSpawnedZPos() {
         return spawnedZPos;
     }
 
-    public void setSpawnedZPos(float spawnedZPos) {
+    public void setSpawnedZPos(Float spawnedZPos) {
         this.spawnedZPos = spawnedZPos;
     }
 
-    public float getKilledXPos() {
+    public Float getKilledXPos() {
         return killedXPos;
     }
 
-    public void setKilledXPos(float killedXPos) {
+    public void setKilledXPos(Float killedXPos) {
         this.killedXPos = killedXPos;
     }
 
-    public float getKilledZPos() {
+    public Float getKilledZPos() {
         return killedZPos;
     }
 
-    public void setKilledZPos(float killedZPos) {
+    public void setKilledZPos(Float killedZPos) {
         this.killedZPos = killedZPos;
     }
 
@@ -164,6 +166,8 @@ public class GameObject {
     public void setTimeOfKill(Integer timeOfKill) {
         this.timeOfKill = timeOfKill;
     }
+
+
 
     // Each tick is 1/50 of a second, e.g. 20 ms
     @Transient

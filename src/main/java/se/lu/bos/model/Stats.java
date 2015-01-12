@@ -65,6 +65,10 @@ public class Stats {
     @Enumerated(EnumType.STRING)
     private State finalState;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "stats_flight_track")
+    private List<FlightPosition> flightTrack = new ArrayList<FlightPosition>();
+
     @Transient
     private static Comparator<Hit> hitComparator = new Comparator<Hit>() {
 
@@ -347,7 +351,15 @@ public class Stats {
         return finalState;
     }
 
-//    public void setAllGameObjects(List<GameObject> allGameObjects) {
+    public List<FlightPosition> getFlightTrack() {
+        return flightTrack;
+    }
+
+    public void setFlightTrack(List<FlightPosition> flightTrack) {
+        this.flightTrack = flightTrack;
+    }
+
+    //    public void setAllGameObjects(List<GameObject> allGameObjects) {
 //        this.allGameObjects = allGameObjects;
 //    }
 //

@@ -1,8 +1,11 @@
 var bosparser = new function() {
 
+    this.currentMissionId;
+
 
     this.scan = function() {
         $('#scanbtn').attr('disabled','disabled');
+        $('#mapbtn').addClass('disabled');
         $body.addClass("loading");
         $.ajax({
             'method' : 'POST',
@@ -24,6 +27,7 @@ var bosparser = new function() {
 
     this.deleteAll = function() {
         $body.addClass("loading");
+        $('#mapbtn').addClass('disabled');
         $.ajax({
             'method' : 'DELETE',
             'url' : '/rest/view/reports',
@@ -44,6 +48,8 @@ var bosparser = new function() {
     this.populateSidebar = function() {
         $('#missions-panel').removeClass('hidden');
         $('#career-panel').addClass('hidden');
+        $('#mapbtn').addClass('disabled');
+        $('#mapcontainer').addClass('hidden');
         $.get('/rest/view/tinyreports', function(data) {
             $('#sidebar').empty();
             if(data.length > 0) {
@@ -66,12 +72,13 @@ var bosparser = new function() {
         });
     }            //<li><a href="#sec1">Section 1</a></li>
 
-    this.populateMission = function(missionid) {
+    this.populateMission = function(missionId) {
         $('#clickme').addClass("hidden");
         $('#missions-inner').removeClass('hidden');
-        if(missionid == null) return;
+        if(missionId == null) return;
 
-        $.get('/rest/view/reports/' + missionid, function(data) {
+        $.get('/rest/view/reports/' + missionId, function(data) {
+            bosparser.currentMissionId = missionId;
 
             $('#mission-name').html(data.missionName);
             $('#mission-date').html(data.gameDate);
@@ -195,8 +202,22 @@ var bosparser = new function() {
 //
 //
 //            }
+           //
+            $('#mapbtn').removeClass('disabled');
+            $('#mapbtn').unbind().click(showMap);
         });
     }
+
+    var showMap = function() {
+        if(!bosparser.currentMissionId) {
+            return;
+        }
+
+        $('#map').removeClass('hidden');
+        $('#mapModal').modal({show:true});
+        maprenderer.renderMission(bosparser.currentMissionId);
+    }
+
 
     var buildTree = function(obj) {
         var tpl = '<ul><li> <span><i class="glyphicon glyphicon-folder-open"></i> '+obj.type+'</span>';
@@ -240,6 +261,7 @@ var bosparser = new function() {
 
 
     this.populateCareer = function() {
+        $('#mapbtn').addClass('disabled');
         $('#missions-panel').addClass('hidden');
         $('#career-panel').removeClass('hidden');
         $.get('/rest/view/totalrx', function(data) {
