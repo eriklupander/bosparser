@@ -1,10 +1,12 @@
 var maprenderer = new function() {
 
     var MAP_URL = "";
-    var MAX_X = 230000;      // Height, from bottom in bos
-    var MAX_Z = 357500;      // Width, from left in bos
+    //var MAX_X = 231000;      // Height, from bottom in bos
+    //var MAX_Z = 357500;      // Width, from left in bos
 
-    var mapHeight, mapWidth;
+    this.mapHeight;
+    this.mapWidth;
+
     var zoom = 1.0;
 
     var MAP_PIXEL_SIZE_X = 8192;
@@ -40,12 +42,35 @@ var maprenderer = new function() {
             $("#map").attr('width', width);
             $("#map").attr('height', height);
 
-            mapHeight = $('#map').attr('height');
-            mapWidth = $('#map').attr('width');
+            maprenderer.mapHeight = $('#map').attr('height');
+            maprenderer.mapWidth = $('#map').attr('width');
+
             $("#map").mousedown(function (e) {
-                startX=parseInt(e.clientX-offsetX);
-                startY=parseInt(e.clientY-offsetY);
+                startX=parseInt(e.clientX-0);
+                startY=parseInt(e.clientY-0);
+                var canvasOffset=$("#map").offset();
+
+                startXX=parseInt(e.clientX-canvasOffset.left);
+                startYY=parseInt(e.clientY-canvasOffset.top);
                 mouseDown = true;
+                // Test select
+                var metadata = {"xd":xd, "zd":zd};
+                // maprenderer.mapWidth*zoom
+               //var worldCoords = coordTranslator.imageToWorld(1156, 3043, metadata);
+                var worldCoords = coordTranslator.imageToWorld(imageX+startXX*zoom, imageY+startYY*zoom, metadata);
+
+
+                var hitBox = coordTranslator.calculateHitBox(imageX+startXX*zoom, imageY+startYY*zoom, metadata, 16);
+
+                // Now what, check every clickable object? Try kills!
+                for(var a = 0; a < sData.kills.length; a++) {
+
+                    console.log("Hitbox: " + hitBox.x1 + "," + hitBox.y1 + " -> " + hitBox.x2 + "," + hitBox.y2);
+                    if(coordTranslator.inHitBox(sData.kills[a].killedXPos, sData.kills[a].killedZPos, hitBox)) {
+                        console.log("Found " + sData.kills[a].type);
+                        break;
+                    }
+                }
             });
             $("#map").mouseout(function (e) {
                 mouseDown = false;
@@ -66,12 +91,12 @@ var maprenderer = new function() {
                 }
                 var wheel = e.originalEvent.wheelDelta/120;
                 var lastZoom = zoom;
-                zoom = zoom - (wheel/30)*zoom;
+                zoom = zoom - (wheel/15)*zoom;
 
-                var currentWidth = mapWidth*lastZoom;
-                var currentHeight = mapHeight*lastZoom;
-                var newWidth = mapWidth*zoom;
-                var newHeight = mapHeight*zoom;
+                var currentWidth = maprenderer.mapWidth*lastZoom;
+                var currentHeight = maprenderer.mapHeight*lastZoom;
+                var newWidth = maprenderer.mapWidth*zoom;
+                var newHeight = maprenderer.mapHeight*zoom;
 
                 var moveImageXBy = (currentWidth-newWidth) * 0.5;
                 var moveImageYBy = (currentHeight-newHeight) * 0.5;
@@ -98,7 +123,7 @@ var maprenderer = new function() {
         zoom = 1.0;
         // We need to find the min/max x and z coords for the mission
         var lowerBounds = {
-            x1 : MAX_X, z1 : MAX_Z
+            x1 : coordTranslator.MAX_X, z1 : coordTranslator.MAX_Z
         }
 
         var upperBounds = {
@@ -115,12 +140,12 @@ var maprenderer = new function() {
             }
         }
 
-        xd = MAX_X / MAP_PIXEL_SIZE_Y;
-        zd = MAX_Z / MAP_PIXEL_SIZE_X;
+        xd = coordTranslator.MAX_X / MAP_PIXEL_SIZE_Y;
+        zd = coordTranslator.MAX_Z / MAP_PIXEL_SIZE_X;
 
         var startPos = translateToPixel(lowerBounds.x1, lowerBounds.z1);
-        imageX = startPos.x - mapWidth/2;
-        imageY = startPos.y - mapHeight/2;
+        imageX = startPos.x - maprenderer.mapWidth/2;
+        imageY = startPos.y - maprenderer.mapHeight/2;
 
         var context = buffer.getContext('2d');
         var imageObj = new Image();
@@ -129,13 +154,6 @@ var maprenderer = new function() {
             $body.removeClass("loading");
             // Render everything AFTER image has loaded, otherwise map renders over other stuff
             context.drawImage(imageObj, 0, 0, MAP_PIXEL_SIZE_X, MAP_PIXEL_SIZE_Y);
-
-            // Draw the flight track on the map
-            //renderFlightMap(context, data);
-
-            // Plot each kill on the map.
-            //renderKillsOnMap(context, data);
-
             draw();
 
             $('#map').css('background-color', 'rgba(158, 167, 184, 1.0)');
@@ -158,66 +176,29 @@ var maprenderer = new function() {
         if(imageX < 0) imageX = 0;
         if(imageY < 0) imageY = 0;
 
-        ctx.drawImage(buffer, imageX, imageY, mapWidth*zoom, mapHeight*zoom, 0, 0, mapWidth, mapHeight);
-        renderFlightMapVectorized(ctx, data);
-        renderKillsOnMapVectorized(ctx, sData);
-        // Test, draw something "vectorized". Same size regardless of zoom but in correct spot.
-
-        // Translate the top left and bottom right coords back into "BoS" coords
-//        var ty = toWorldCoordY(imageX);
-//        var tx = toWorldCoordX(imageY);
-//
-//        var by = toWorldCoordY(imageX+mapWidth*zoom)
-//        var bx = toWorldCoordX(imageY+mapHeight*zoom);
-//
-//        // Check if our object is visible
-//        var objX = 96000;
-//        var objY = 56000;
-//
-//        if(objX < tx && objX > bx && objY > ty && objY < by) {
-//            // If on screen, translate into current pixel coords and render...
-//            var vImageX = (((objY - ty) / (by - ty)) * mapWidth);
-//            var vImageY = (1 - ((objX - bx) / (tx - bx))) * mapHeight;
-//
-//            var radius = 35;
-//            ctx.beginPath();
-//            ctx.arc(vImageX, vImageY, radius, 0, 2 * Math.PI, false);
-//            ctx.fillStyle = 'green';
-//            ctx.fill();
-//            ctx.lineWidth = 5;
-//            ctx.strokeStyle = '#003300';
-//            ctx.stroke();
-//        }
-
-
-
+        ctx.drawImage(buffer, imageX, imageY, maprenderer.mapWidth*zoom, maprenderer.mapHeight*zoom, 0, 0, maprenderer.mapWidth, maprenderer.mapHeight);
+        var viewport = calcViewPortWorldCoordinates();
+        renderer.renderFlightMapVectorized(viewport, ctx, sData);
+        renderer.renderKillsOnMapVectorized(viewport, ctx, sData);
     }
 
-    /*
-     var mapX =  ((MAX_X - x) / xd);
-     var mapZ = z / zd;
-     return {
-     x : mapZ,
-     y : mapX
-     }
-     */
     var toWorldCoordY = function(pixel) {
         return pixel * xd;
     }
     var toWorldCoordX = function(pixel) {
-        return MAX_X - (pixel*zd);
+        return coordTranslator.MAX_X - (pixel*zd);
     }
 
-    var getImageCoordsInCurrentViewport = function(viewport, objX, objY) {
-        //if(objX < viewport.tx && objX > viewport.bx && objY > viewport.ty && objY < viewport.by) {
-            // If on screen, translate into current pixel coords and render...
-        var vImageX = (((objY - viewport.ty) / (viewport.by - viewport.ty)) * mapWidth);
-        var vImageY = (1 - ((objX - viewport.bx) / (viewport.tx - viewport.bx))) * mapHeight;
-        return {
-            x : vImageX,
-            y : vImageY
-        };
-    }
+//    var getImageCoordsInCurrentViewport = function(viewport, objX, objY) {
+//        //if(objX < viewport.tx && objX > viewport.bx && objY > viewport.ty && objY < viewport.by) {
+//            // If on screen, translate into current pixel coords and render...
+//        var vImageX = (((objY - viewport.ty) / (viewport.by - viewport.ty)) * this.mapWidth);
+//        var vImageY = (1 - ((objX - viewport.bx) / (viewport.tx - viewport.bx))) * this.mapHeight;
+//        return {
+//            x : vImageX,
+//            y : vImageY
+//        };
+//    }
 
     /**
      * Returns the current viewport map as BoS world coordinates
@@ -230,8 +211,8 @@ var maprenderer = new function() {
         var viewport = {
             ty : toWorldCoordY(imageX),
             tx : toWorldCoordX(imageY),
-            by : toWorldCoordY(imageX+mapWidth*zoom),
-            bx : toWorldCoordX(imageY+mapHeight*zoom)
+            by : toWorldCoordY(imageX+maprenderer.mapWidth*zoom),
+            bx : toWorldCoordX(imageY+maprenderer.mapHeight*zoom)
         };
         return viewport;
     }
@@ -255,7 +236,7 @@ var maprenderer = new function() {
 
            // if(imageX > 8192-1500*zoom) imageX = 8192-mapWidth;
           //  if(imageY > 5245-1100*zoom) imageY = 5245-mapHeight;
-            console.log("img x:" + imageX + ", img y:" + imageY);
+         //   console.log("img x:" + imageX + ", img y:" + imageY);
 
             startX = mouseX;
             startY = mouseY;
@@ -280,42 +261,15 @@ var maprenderer = new function() {
                 // Get width/height before and then after next zoom.
                 // Take each difference and split in half. Add/subtract to x and y.
 
-                var currentWidth = mapWidth*lastZoom;
-                var currentHeight = mapHeight*lastZoom;
-                var newWidth = mapWidth*zoom;
-                var newHeight = mapHeight*zoom;
+                var currentWidth = maprenderer.mapWidth*lastZoom;
+                var currentHeight = maprenderer.mapHeight*lastZoom;
+                var newWidth = maprenderer.mapWidth*zoom;
+                var newHeight = maprenderer.mapHeight*zoom;
 
                 var moveImageXBy = (currentWidth-newWidth) * 0.5;
                 var moveImageYBy = (currentHeight-newHeight) * 0.5;
                 imageX += moveImageXBy;
                 imageY += moveImageYBy;
-
-                 /*
-                  self.scrollView.zoomScale = 1;
-                  self.scrollView.minimumZoomScale = fminf(1, fminf(frame.size.width/(image.size.width+1), frame.size.height/(image.size.height+1)));
-                  CGFloat leftMargin = (frame.size.width - image.size.width)*0.5;
-                  CGFloat topMargin = (frame.size.height - image.size.height)*0.5;
-                  self.imageView.frame = CGRectMake(0, 0, image.size.width, image.size.height);
-                  [self assignInsetsOnScroller]; // this has to be done before settings contentOffset!
-                  self.scrollView.contentOffset = CGPointMake(fmaxf(0,-leftMargin), fmaxf(0,-topMargin));
-                  self.scrollView.contentSize = CGSizeMake(fmaxf(image.size.width, frame.size.width+1), fmaxf(image.size.height, frame.size.height+1));
-                 
-                 
-                 
-                 
-                 
-                 */
-                // We should do something here to make the zoom occur from center,
-                // not top-left
-               // imageX = imageX + (imageX*zoom);
-               // imageY = imageY + (imageY*zoom);
-//                if(dy < 0) {
-//                    imageX = imageX + 1;
-//                    imageY = imageY + 1;
-//                } else {
-//                    imageX = imageX - 1;
-//                    imageY = imageY - 1;
-//                }
 
                 draw();
             }
@@ -324,168 +278,23 @@ var maprenderer = new function() {
         }
     }
 
-    var renderKillsOnMap = function(context, data) {
-        context.save();
-        if(data.kills.length > 0) {
-            for(var a = 0; a < data.kills.length; a++) {
-                var kill = data.kills[a];
-                if(kill.parentId == -1 && kill.killedXPos != null && kill.killedZPos != null)   {
-                    var coord = translateToPixel(kill.killedXPos, kill.killedZPos);
-                    drawKill(coord.x, coord.y, 10, kill.type, context);
-                }
-            }
-        }
-        context.restore();
-    }
+//    var renderKillsOnMap = function(context, data) {
+//        context.save();
+//        if(data.kills.length > 0) {
+//            for(var a = 0; a < data.kills.length; a++) {
+//                var kill = data.kills[a];
+//                if(kill.parentId == -1 && kill.killedXPos != null && kill.killedZPos != null)   {
+//                    var coord = translateToPixel(kill.killedXPos, kill.killedZPos);
+//                    drawKill(coord.x, coord.y, 10, kill.type, context);
+//                }
+//            }
+//        }
+//        context.restore();
+//    }
 
-    var renderKillsOnMapVectorized = function(context, data) {
-        var viewport = calcViewPortWorldCoordinates();
-        context.save();
-        if(data.kills.length > 0) {
-            for(var a = 0; a < data.kills.length; a++) {
-                var kill = data.kills[a];
-                if(kill.parentId == -1 && kill.killedXPos != null && kill.killedZPos != null)   {
-                    var coord = getImageCoordsInCurrentViewport(viewport, kill.killedXPos, kill.killedZPos);
-                    drawKill(coord.x, coord.y, 10, kill.type, context);
-                }
-            }
-        }
-        context.restore();
-    }
 
-    var renderFlightMap = function(context, data) {
-        context.save();
-        if(data.flightTrack.length > 1) {
-            var startingCoord = translateToPixel(data.flightTrack[0].x, data.flightTrack[0].z);
 
-            context.beginPath();
-            context.moveTo(startingCoord.x, startingCoord.y);
-            drawStartSymbol(startingCoord.x, startingCoord.y, context);
-            context.moveTo(startingCoord.x, startingCoord.y);
-            for(var a = 1; a < data.flightTrack.length; a++) {
-                var fp = data.flightTrack[a];
-                drawFlightPath(fp, context);
-            }
-            context.stroke();
-        }
-        var secondEndingCoord = translateToPixel(data.flightTrack[data.flightTrack.length - 2].x, data.flightTrack[data.flightTrack.length - 2].z);
-        var endingCoord = translateToPixel(data.flightTrack[data.flightTrack.length - 1].x, data.flightTrack[data.flightTrack.length - 1].z);
-        drawEndSymbol(endingCoord.x, endingCoord.y, secondEndingCoord.x, secondEndingCoord.y, context);
-        context.restore();
-    }
-    
-    var renderFlightMapVectorized = function(viewport, context, data) {
-    	
-        context.save();
-        if(data.flightTrack.length > 1) {
-            var startingCoord = getImageCoordsInCurrentViewport(viewport, data.flightTrack[0].x, data.flightTrack[0].z);
 
-            context.beginPath();
-            context.moveTo(startingCoord.x, startingCoord.y);
-            drawStartSymbol(startingCoord.x, startingCoord.y, context);
-            context.moveTo(startingCoord.x, startingCoord.y);
-            for(var a = 1; a < data.flightTrack.length; a++) {
-                var fp = data.flightTrack[a];
-                drawFlightPathVectorized(viewport, fp, context);
-            }
-            context.stroke();
-        }
-        var secondEndingCoord = getImageCoordsInCurrentViewport(viewport, data.flightTrack[data.flightTrack.length - 2].x, data.flightTrack[data.flightTrack.length - 2].z);
-        var endingCoord = getImageCoordsInCurrentViewport(viewport, data.flightTrack[data.flightTrack.length - 1].x, data.flightTrack[data.flightTrack.length - 1].z);
-        drawEndSymbol(endingCoord.x, endingCoord.y, secondEndingCoord.x, secondEndingCoord.y, context);
-        context.restore();
-    }
-
-    var drawFlightPath = function(fp, context) {
-        var coord = translateToPixel(fp.x, fp.z);
-        context.lineWidth = 2;
-        context.lineTo(coord.x, coord.y);
-        context.arc(coord.x, coord.y, 2, 0, 2*Math.PI, false);
-        context.moveTo(coord.x, coord.y);
-    }
-    
-    var drawFlightPathVectorized = function(viewport, fp, context) {
-        var coord = getImageCoordsInCurrentViewport(viewport, fp.x, fp.z);
-        context.lineWidth = 2;
-        context.lineTo(coord.x, coord.y);
-        context.arc(coord.x, coord.y, 2, 0, 2*Math.PI, false);
-        context.moveTo(coord.x, coord.y);
-    }
-
-    var drawKill = function(x, y, size, label, context) {
-
-        context.beginPath();
-        context.arc(x, y, size, 0, 2 * Math.PI, false);
-        context.fillStyle = 'red';
-        context.globalAlpha = 0.8;
-        context.fill();
-        context.globalAlpha = 1.0;
-        context.lineWidth = 2;
-        context.strokeStyle = '#550000';
-        context.stroke();
-
-        context.font = '12pt Open Sans';
-        context.textAlign = 'center';
-
-        context.fillText(label, x, y+size+16);
-
-        context.font = '10pt Open Sans';
-        context.textAlign = 'center';
-
-        context.fillStyle = 'white';
-        context.fillText("K", x, y+4);
-
-    }
-
-    var drawStartSymbol = function(x, y, context) {
-        context.save();
-
-        context.beginPath();
-        context.arc(x, y, 15, 0, Math.PI*2, false);
-        context.closePath();
-        context.lineWidth = 3;
-        context.fillStyle = 'green';
-        context.globalAlpha = 0.8;
-        context.fill();
-        context.globalAlpha = 1.0;
-        context.strokeStyle = '#005500';
-        context.stroke();
-
-        context.font = '12pt arial';
-        context.textAlign = 'center';
-
-        context.fillStyle = 'white';
-        context.fillText("S", x, y+5);
-
-        context.restore();
-    }
-    var drawEndSymbol = function(x, y, x2, y2, context) {
-        context.save();
-        context.beginPath();
-        context.moveTo(x2, y2);
-        context.lineWidth = 2;
-        context.lineTo(x, y);
-        context.closePath();
-        context.stroke();
-
-        context.beginPath();
-        context.arc(x, y, 15, 0, Math.PI*2, false);
-        context.closePath();
-        context.lineWidth = 3;
-        context.fillStyle = 'red';
-        context.globalAlpha = 0.8;
-        context.fill();
-        context.globalAlpha = 1.0;
-        context.strokeStyle = '#550000';
-        context.stroke();
-
-        context.font = '12pt arial';
-        context.textAlign = 'center';
-
-        context.fillStyle = 'white';
-        context.fillText("E", x, y+5);
-        context.restore();
-    }
 
     /**
      * Map a BOS x,z coordinate to a pixel coord on our map
@@ -494,7 +303,7 @@ var maprenderer = new function() {
      * @param z
      */
     var translateToPixel= function(x, z) {
-        var mapX =  ((MAX_X - x) / xd);
+        var mapX =  ((coordTranslator.MAX_X - x) / xd);
         var mapZ = z / zd;
         return {
             x : mapZ,

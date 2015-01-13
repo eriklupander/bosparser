@@ -1,7 +1,7 @@
 var coordTranslator = new function() {
 
-	var MAX_X = 230000;      // Height, from bottom in bos
-    var MAX_Z = 357500;      // Width, from left in bos
+	this.MAX_X = 229135;      // Height, from bottom in bos
+    this.MAX_Z = 357500;      // Width, from left in bos
 
     var MAP_PIXEL_SIZE_X = 8192;
     var MAP_PIXEL_SIZE_Y = 5245;
@@ -38,12 +38,27 @@ var coordTranslator = new function() {
             y : vImageY
         };
 	}
+
+    this.calculateHitBox = function(imageX, imageY, metadata, radius) {
+        var box = {};
+        var topLeft = coordTranslator.imageToWorld(imageX-radius, imageY-radius, metadata);
+        var bottomRight = coordTranslator.imageToWorld(imageX+radius, imageY+radius, metadata);
+        box.x1 = topLeft.x;
+        box.y1 = topLeft.z;
+        box.x2 = bottomRight.x;
+        box.y2 = bottomRight.z;
+        return box;
+    }
+
+    this.inHitBox = function(worldX, worldY, hitBox) {
+        return worldX < hitBox.x1 && worldX > hitBox.x2 && worldY > hitBox.y1 && worldY < hitBox.y2;
+    }
 	
 	var toWorldCoordY = function(imagePixelX, xd) {
         return imagePixelX * xd;
     }
     var toWorldCoordX = function(imagePixelY, zd) {
-        return MAX_X - (imagePixelY*zd);
+        return coordTranslator.MAX_X - (imagePixelY*zd);
     }
 
 };
