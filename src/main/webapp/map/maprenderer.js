@@ -131,7 +131,7 @@ var maprenderer = new function() {
             context.drawImage(imageObj, 0, 0, MAP_PIXEL_SIZE_X, MAP_PIXEL_SIZE_Y);
 
             // Draw the flight track on the map
-            renderFlightMap(context, data);
+            //renderFlightMap(context, data);
 
             // Plot each kill on the map.
             //renderKillsOnMap(context, data);
@@ -159,6 +159,7 @@ var maprenderer = new function() {
         if(imageY < 0) imageY = 0;
 
         ctx.drawImage(buffer, imageX, imageY, mapWidth*zoom, mapHeight*zoom, 0, 0, mapWidth, mapHeight);
+        renderFlightMapVectorized(ctx, data);
         renderKillsOnMapVectorized(ctx, sData);
         // Test, draw something "vectorized". Same size regardless of zoom but in correct spot.
 
@@ -372,16 +373,43 @@ var maprenderer = new function() {
         drawEndSymbol(endingCoord.x, endingCoord.y, secondEndingCoord.x, secondEndingCoord.y, context);
         context.restore();
     }
+    
+    var renderFlightMapVectorized = function(viewport, context, data) {
+    	
+        context.save();
+        if(data.flightTrack.length > 1) {
+            var startingCoord = getImageCoordsInCurrentViewport(viewport, data.flightTrack[0].x, data.flightTrack[0].z);
+
+            context.beginPath();
+            context.moveTo(startingCoord.x, startingCoord.y);
+            drawStartSymbol(startingCoord.x, startingCoord.y, context);
+            context.moveTo(startingCoord.x, startingCoord.y);
+            for(var a = 1; a < data.flightTrack.length; a++) {
+                var fp = data.flightTrack[a];
+                drawFlightPathVectorized(viewport, fp, context);
+            }
+            context.stroke();
+        }
+        var secondEndingCoord = getImageCoordsInCurrentViewport(viewport, data.flightTrack[data.flightTrack.length - 2].x, data.flightTrack[data.flightTrack.length - 2].z);
+        var endingCoord = getImageCoordsInCurrentViewport(viewport, data.flightTrack[data.flightTrack.length - 1].x, data.flightTrack[data.flightTrack.length - 1].z);
+        drawEndSymbol(endingCoord.x, endingCoord.y, secondEndingCoord.x, secondEndingCoord.y, context);
+        context.restore();
+    }
 
     var drawFlightPath = function(fp, context) {
         var coord = translateToPixel(fp.x, fp.z);
         context.lineWidth = 2;
         context.lineTo(coord.x, coord.y);
-
-       // context.rotate(230);
         context.arc(coord.x, coord.y, 2, 0, 2*Math.PI, false);
         context.moveTo(coord.x, coord.y);
-       // context.rotate(-230);
+    }
+    
+    var drawFlightPathVectorized = function(viewport, fp, context) {
+        var coord = getImageCoordsInCurrentViewport(viewport, fp.x, fp.z);
+        context.lineWidth = 2;
+        context.lineTo(coord.x, coord.y);
+        context.arc(coord.x, coord.y, 2, 0, 2*Math.PI, false);
+        context.moveTo(coord.x, coord.y);
     }
 
     var drawKill = function(x, y, size, label, context) {
