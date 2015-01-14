@@ -39,6 +39,28 @@ var renderer = new function() {
     }
 
 
+    this.renderKillInfoDialog = function(kill) {
+        $('#gid_objectname').text(kill.type);
+        $('#gid_timekilled').text(kill.gameTime);     gid_side
+        $('#gid_side').text(kill.country);
+        $('#gid_hitcount').text(kill.totalHits);
+
+        var hitsByType = kill.hits;
+        $('#gid_hitsbytype').empty();
+        if(hitsByType != null) {
+            for (var key in hitsByType) {
+                if (hitsByType.hasOwnProperty(key)) {
+                    var tpl = '<div class="row">' +
+                        '<div class="col-md-10">' + key + '</div>' +
+                        '<div class="col-md-2">' + hitsByType[key] + '</div>' +
+                        '</div>';
+                    $('#gid_hitsbytype').append(tpl);
+                }
+            }
+        }
+        $('#gid-dialog').removeClass("hidden");
+    }
+
      var drawFlightPathVectorized = function(viewport, fp, context) {
         var coord = coordTranslator.worldToImageInViewport(fp.x, fp.z, viewport, maprenderer.mapWidth, maprenderer.mapHeight);
         context.lineWidth = 2;

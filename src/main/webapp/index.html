@@ -284,6 +284,7 @@
 <script src="js/bosparser.js"></script>
 <script src="map/coordTranslator.js"></script>
 <script src="map/renderer.js"></script>
+<script src="map/modelhelper.js"></script>
 <script src="map/maprenderer.js"></script>
 
 </body>
@@ -336,23 +337,34 @@
 
 <div class="modalspinner"><!-- Place at bottom of page --></div>
 
-<div class="gameinfo-dialog hidden">
-	<div class="col-md-12">
+
+<div id="gid-dialog" class="panel panel-default gameinfo-dialog hidden">
+
+    <div class="panel-body" >
         <div class="row">
-            <div class="col-md-12 th" id="gid_objectname">Name of object</div>
+            <div class="col-md-12 text-center"><h5>Kill information</h5></div>
         </div>
         <div class="row">
-            <div class="col-md-4">Time killed</div>
-        	<div class="col-md-8" id="gid_timekilled">13:37</div>
+            <div class="col-md-6">Object</div>
+            <div class="col-md-6" id="gid_objectname"></div>
         </div>
         <div class="row">
-            <div class="col-md-4">Hits</div>
-        	<div class="col-md-8" id="gid_hitcount">12</div>
+            <div class="col-md-6">Time killed</div>
+            <div class="col-md-6" id="gid_timekilled"></div>
         </div>
         <div class="row">
-            <div class="col-md-4">Side</div>
-        	<div class="col-md-8" id="gid_side">....</div>
+            <div class="col-md-6">Hits</div>
+            <div class="col-md-6" id="gid_hitcount"></div>
         </div>
+        <div class="row">
+            <div class="col-md-6">Side</div>
+            <div class="col-md-6" id="gid_side"></div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-12 text-center"><h5>Hits by ammunition type</h5></div>
+        </div>
+        <span id="gid_hitsbytype"></span>
     </div>
 </div>
 

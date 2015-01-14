@@ -36,6 +36,9 @@ var maprenderer = new function() {
         $body.addClass("loading");
         $.get('/rest/view/reports/' + missionid, function(data) {
             sData = data;
+
+            modelhelper.enrichKillsWithHits(sData);
+
             var width = $(window).width() * 0.9;
             var height = $(window).height() * 0.80;
 
@@ -55,21 +58,23 @@ var maprenderer = new function() {
                 mouseDown = true;
                 // Test select
                 var metadata = {"xd":xd, "zd":zd};
-                // maprenderer.mapWidth*zoom
-               //var worldCoords = coordTranslator.imageToWorld(1156, 3043, metadata);
                 var worldCoords = coordTranslator.imageToWorld(imageX+startXX*zoom, imageY+startYY*zoom, metadata);
 
 
                 var hitBox = coordTranslator.calculateHitBox(imageX+startXX*zoom, imageY+startYY*zoom, metadata, 16);
-
+                var hit = false;
                 // Now what, check every clickable object? Try kills!
                 for(var a = 0; a < sData.kills.length; a++) {
 
                     console.log("Hitbox: " + hitBox.x1 + "," + hitBox.y1 + " -> " + hitBox.x2 + "," + hitBox.y2);
-                    if(coordTranslator.inHitBox(sData.kills[a].killedXPos, sData.kills[a].killedZPos, hitBox)) {
-                        console.log("Found " + sData.kills[a].type);
+                    if(sData.kills[a].parentId == -1 && coordTranslator.inHitBox(sData.kills[a].killedXPos, sData.kills[a].killedZPos, hitBox)) {
+                        hit = true;
+                        renderer.renderKillInfoDialog(sData.kills[a]);
                         break;
                     }
+                }
+                if(!hit) {
+                    $('#gid-dialog').addClass("hidden");
                 }
             });
             $("#map").mouseout(function (e) {

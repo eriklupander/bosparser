@@ -51,11 +51,17 @@ body.loading .modalspinner {
     border-radius: 0;
 }
 
-.gameinfodialog {
-	
+.gameinfo-dialog {
+	z-index: 1040;
 	position:absolute;
-	right:100px;
+	right:10px;
 	top:100px;
-	width:80px;
-	height:120px;
+    min-width: 260px;
+    border:2px solid !important;
+    border-radius:8px;
+    box-shadow: 10 10px 10px rgba(0,0,0,0.5);
+}
+
+h5 {
+    font-size:14pt;
 }

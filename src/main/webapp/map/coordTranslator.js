@@ -53,6 +53,10 @@ var coordTranslator = new function() {
     this.inHitBox = function(worldX, worldY, hitBox) {
         return worldX < hitBox.x1 && worldX > hitBox.x2 && worldY > hitBox.y1 && worldY < hitBox.y2;
     }
+
+    this.doIfHit = function(hitbox, sData, callback) {
+
+    }
 	
 	var toWorldCoordY = function(imagePixelX, xd) {
         return imagePixelX * xd;
