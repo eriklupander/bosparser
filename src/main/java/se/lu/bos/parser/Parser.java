@@ -35,6 +35,10 @@ public class Parser {
 
         stats.setReportFileDate(new Concatenator().getFirstFileDate(folder, rootFileName));
         stats.setFullLog(logdata);
+        return buildStatsFromLogData(stats, logdata);
+    }
+
+    private Stats buildStatsFromLogData(Stats stats, String logdata) {
         List<String> logRows = toList(logdata);
 
         Integer playerId = parsePlayerId(logRows);
@@ -68,8 +72,8 @@ public class Parser {
         stats.setFinalState(resolveFinalPlayerObjectState(logRows, playerId));
 
         // Leaving this commented out for now.
-      //  findAllGameObjects(logRows);
-      //  stats.setAllGameObjects(allGameObjects);
+        //  findAllGameObjects(logRows);
+        //  stats.setAllGameObjects(allGameObjects);
 
         logRecordedStats(stats);
 
@@ -511,5 +515,9 @@ public class Parser {
             log.error("Message: " + e.getMessage());
             return 0;
         }
+    }
+
+    public Stats rebuildFromStoredLog(Stats s, String fullLog) {
+        return buildStatsFromLogData(s, fullLog);
     }
 }

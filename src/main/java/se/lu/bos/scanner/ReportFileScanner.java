@@ -9,4 +9,5 @@ package se.lu.bos.scanner;
  */
 public interface ReportFileScanner {
     int scan();
+    int rescan();
 }

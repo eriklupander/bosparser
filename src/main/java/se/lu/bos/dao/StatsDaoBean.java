@@ -101,4 +101,10 @@ public class StatsDaoBean implements StatsDao {
         }
         return list;
     }
+
+    @Override
+    @Transactional
+    public Stats update(Stats stats) {
+        return em.merge(stats);
+    }
 }

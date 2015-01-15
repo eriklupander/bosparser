@@ -24,8 +24,12 @@ var maprenderer = new function() {
     var sData;
 
     this.renderMission = function(missionid) {
+        // Reset all map-scroll state variables when a new mission is rendered.
         mouseX = 0, mouseY = 0, imageX = 0, imageY = 0, startX = 0, startY = 0, offsetX = 0, offsetY = 0, zoom = 1.0;
-       // $('#mapcontainer').removeClass('hidden');
+
+        // Calculate the factor between map size in world coords and pixels
+        xd = coordTranslator.MAX_X / MAP_PIXEL_SIZE_Y;
+        zd = coordTranslator.MAX_Z / MAP_PIXEL_SIZE_X;
 
         // Disable browser context menu on canvas.
         $('#map').contextmenu( function() {
@@ -51,22 +55,23 @@ var maprenderer = new function() {
             $("#map").mousedown(function (e) {
                 startX=parseInt(e.clientX-0);
                 startY=parseInt(e.clientY-0);
+                mouseDown = true;
+
+                // TODO Refactor the hitbox generation into a generic method taking a collection to operate on
+                // TODO and a callback to execute for each "hit"
                 var canvasOffset=$("#map").offset();
 
                 startXX=parseInt(e.clientX-canvasOffset.left);
                 startYY=parseInt(e.clientY-canvasOffset.top);
-                mouseDown = true;
+
                 // Test select
                 var metadata = {"xd":xd, "zd":zd};
-                var worldCoords = coordTranslator.imageToWorld(imageX+startXX*zoom, imageY+startYY*zoom, metadata);
-
-
                 var hitBox = coordTranslator.calculateHitBox(imageX+startXX*zoom, imageY+startYY*zoom, metadata, 16);
                 var hit = false;
+
                 // Now what, check every clickable object? Try kills!
                 for(var a = 0; a < sData.kills.length; a++) {
 
-                    console.log("Hitbox: " + hitBox.x1 + "," + hitBox.y1 + " -> " + hitBox.x2 + "," + hitBox.y2);
                     if(sData.kills[a].parentId == -1 && coordTranslator.inHitBox(sData.kills[a].killedXPos, sData.kills[a].killedZPos, hitBox)) {
                         hit = true;
                         renderer.renderKillInfoDialog(sData.kills[a]);
@@ -121,7 +126,7 @@ var maprenderer = new function() {
         buffer = document.createElement('canvas');
         buffer.width = width;
         buffer.height = height;
-        renderFunction(data); //buffer.getContext('2d'));
+        renderFunction(data);
     };
 
     var renderFunction = function(data) {
@@ -145,10 +150,7 @@ var maprenderer = new function() {
             }
         }
 
-        xd = coordTranslator.MAX_X / MAP_PIXEL_SIZE_Y;
-        zd = coordTranslator.MAX_Z / MAP_PIXEL_SIZE_X;
-
-        var startPos = translateToPixel(lowerBounds.x1, lowerBounds.z1);
+        var startPos = coordTranslator.worldToImage(lowerBounds.x1, lowerBounds.z1, {"xd":xd, "zd":zd});
         imageX = startPos.x - maprenderer.mapWidth/2;
         imageY = startPos.y - maprenderer.mapHeight/2;
 
@@ -170,7 +172,8 @@ var maprenderer = new function() {
 
 
 
-
+    // The draw function is invoked every time the map is zoomed or panned. It reuses the canvas
+    // with the huge map bitmap already rendered.
     var draw = function() {
         var canvas = document.getElementById('map');
         var ctx = canvas.getContext('2d');
@@ -180,6 +183,8 @@ var maprenderer = new function() {
         ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
         if(imageX < 0) imageX = 0;
         if(imageY < 0) imageY = 0;
+
+        // TODO Add check so we can't pan outside of the map bounds. Do by limiting imageX/Y to MAX - width/height*zoom?
 
         ctx.drawImage(buffer, imageX, imageY, maprenderer.mapWidth*zoom, maprenderer.mapHeight*zoom, 0, 0, maprenderer.mapWidth, maprenderer.mapHeight);
         var viewport = calcViewPortWorldCoordinates();
@@ -194,16 +199,6 @@ var maprenderer = new function() {
         return coordTranslator.MAX_X - (pixel*zd);
     }
 
-//    var getImageCoordsInCurrentViewport = function(viewport, objX, objY) {
-//        //if(objX < viewport.tx && objX > viewport.bx && objY > viewport.ty && objY < viewport.by) {
-//            // If on screen, translate into current pixel coords and render...
-//        var vImageX = (((objY - viewport.ty) / (viewport.by - viewport.ty)) * this.mapWidth);
-//        var vImageY = (1 - ((objX - viewport.bx) / (viewport.tx - viewport.bx))) * this.mapHeight;
-//        return {
-//            x : vImageX,
-//            y : vImageY
-//        };
-//    }
 
     /**
      * Returns the current viewport map as BoS world coordinates
@@ -238,10 +233,6 @@ var maprenderer = new function() {
             imageY = imageY ? imageY + -dy*2 : -dy*2;
             if(imageX < 0) imageX = 0;
             if(imageY < 0) imageY = 0;
-
-           // if(imageX > 8192-1500*zoom) imageX = 8192-mapWidth;
-          //  if(imageY > 5245-1100*zoom) imageY = 5245-mapHeight;
-         //   console.log("img x:" + imageX + ", img y:" + imageY);
 
             startX = mouseX;
             startY = mouseY;
@@ -282,38 +273,4 @@ var maprenderer = new function() {
 
         }
     }
-
-//    var renderKillsOnMap = function(context, data) {
-//        context.save();
-//        if(data.kills.length > 0) {
-//            for(var a = 0; a < data.kills.length; a++) {
-//                var kill = data.kills[a];
-//                if(kill.parentId == -1 && kill.killedXPos != null && kill.killedZPos != null)   {
-//                    var coord = translateToPixel(kill.killedXPos, kill.killedZPos);
-//                    drawKill(coord.x, coord.y, 10, kill.type, context);
-//                }
-//            }
-//        }
-//        context.restore();
-//    }
-
-
-
-
-
-    /**
-     * Map a BOS x,z coordinate to a pixel coord on our map
-     *
-     * @param x
-     * @param z
-     */
-    var translateToPixel= function(x, z) {
-        var mapX =  ((coordTranslator.MAX_X - x) / xd);
-        var mapZ = z / zd;
-        return {
-            x : mapZ,
-            y : mapX
-        }
-    };
-
 }

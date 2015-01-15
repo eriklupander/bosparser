@@ -5,6 +5,7 @@ var bosparser = new function() {
 
     this.scan = function() {
         $('#scanbtn').attr('disabled','disabled');
+        $('#rescanbtn').attr('disabled','disabled');
         $('#mapbtn').addClass('disabled');
         $body.addClass("loading");
         $.ajax({
@@ -13,6 +14,7 @@ var bosparser = new function() {
             'complete' : function(data) {
                 $('#modal-content').html(data.responseText);
                 $('#scanbtn').removeAttr('disabled');
+                $('#rescanbtn').removeAttr('disabled');
                 $body.removeClass("loading");
                 $('#myModal').modal({show:true});
                 bosparser.populateSidebar();
@@ -20,6 +22,31 @@ var bosparser = new function() {
             },
             'error' : function() {
                 $('#scanbtn').removeAttr('disabled');
+                $('#rescanbtn').removeAttr('disabled');
+                $body.removeClass("loading");
+            }
+        });
+    }
+
+    this.rescan = function() {
+        $('#scanbtn').attr('disabled','disabled');
+        $('#rescanbtn').attr('disabled','disabled');
+        $('#mapbtn').addClass('disabled');
+        $body.addClass("loading");
+        $.ajax({
+            'method' : 'PUT',
+            'url' : '/rest/view/reports',
+            'complete' : function(data) {
+                $('#modal-content').html(data.responseText);
+                $('#scanbtn').removeAttr('disabled');
+                $('#rescanbtn').removeAttr('disabled');
+                $body.removeClass("loading");
+                $('#myModal').modal({show:true});
+                bosparser.populateSidebar();
+            },
+            'error' : function() {
+                $('#scanbtn').removeAttr('disabled');
+                $('#rescanbtn').removeAttr('disabled');
                 $body.removeClass("loading");
             }
         });
@@ -214,7 +241,9 @@ var bosparser = new function() {
         }
 
         $('#map').removeClass('hidden');
-        $('#mapModal').modal({show:true});
+        $('#mapModal').modal({show:true}).on('hidden.bs.modal', function () {
+            $('#gid-dialog').addClass('hidden');
+        });
         maprenderer.renderMission(bosparser.currentMissionId);
     }
 

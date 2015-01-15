@@ -7,12 +7,12 @@ var coordTranslator = new function() {
     var MAP_PIXEL_SIZE_Y = 5245;
 
 	this.worldToImage = function(worldX, worldY, metaData) {
-		var mapX =  ((MAX_X - worldX) / metaData.xd);
+		var mapX =  ((coordTranslator.MAX_X - worldX) / metaData.xd);
         var mapZ = worldY / metaData.zd;
         return {
             x : mapZ,
             y : mapX
-        }
+        };
 	}
 	
 	this.imageToWorld = function(imageX, imageY, metaData) {

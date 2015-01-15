@@ -73,6 +73,35 @@ public class ReportFileScannerBean implements ReportFileScanner {
         return scanCount;
     }
 
+    @Override
+    public int rescan() {
+        List<Stats> statsList = statsDao.getAll();
+        int count = 0;
+        for(Stats s : statsList) {
+            if(s.getFullLog() != null) {
+                s = resetStats(s);
+                rebuildStats(s);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void rebuildStats(Stats s) {
+        s = new Parser().rebuildFromStoredLog(s, s.getFullLog());
+        statsDao.update(s);
+    }
+
+    private Stats resetStats(Stats s) {
+        s.getAssociatedObjects().clear();
+        s.getKills().clear();
+        s.getFlightTrack().clear();
+        s.getHits().clear();
+        s.getHitsTaken().clear();
+        s.getUniqueAmmoTypes().clear();
+        return statsDao.update(s);
+    }
+
     public String parseRootName(File f) {
         return f.getName().substring(0, f.getName().length() - 7);
 

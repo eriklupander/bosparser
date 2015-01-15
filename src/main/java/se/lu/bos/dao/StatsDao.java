@@ -23,4 +23,6 @@ public interface StatsDao {
     int deleteAll();
 
     List<TinyReport> getTinyReports();
+
+    Stats update(Stats stats);
 }

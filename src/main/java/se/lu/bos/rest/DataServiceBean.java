@@ -360,6 +360,12 @@ public class DataServiceBean {
         return new ResponseEntity("Deleted " + deletedReports + " mission reports", HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.PUT, value = "/reports", produces = "application/json")
+    public ResponseEntity<Stats> rescanReports() {
+        int scannedReports = reportFileScanner.rescan();
+        return new ResponseEntity("Rescanned " + scannedReports + " mission reports from " + env.getProperty("reports.directory", ReportFileScannerBean.DEFAULT_SCAN_FOLDER), HttpStatus.OK);
+    }
+
     // Spring setter, also for unit testing
     public void setStatsDao(StatsDao statsDao) {
         this.statsDao = statsDao;
